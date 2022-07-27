@@ -8,27 +8,36 @@ from matplotlib.patches import Polygon
 
 
 class SubDB:
-    def __init__(self):
-        """ Import csv files, truncate, and join """
-        # Read in files
-        general_search = pd.read_csv(r"C:\\Users\\MooTra\Downloads\\general_search_2.0.csv")
-        search = pd.read_csv(r"C:\\Users\\MooTra\Downloads\\subjects.csv")
+    def __init__(self, db_source):
+        """ Load in database records """
 
-        # Truncate to columns of interest
-        cols_general = [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 
-                        17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 
-                        31, 32, 33, 34, 35, 36, 38, 40, 42, 49, 51, 52, 87, 89, 
-                        108, 111, 112, 115, 120, 122, 123, 130, 132, 133, 150, 
-                        153, 154, 157, 162, 163, 164, 165, 169, 171, 172, 175, 
-                        176, 177, 178, 179, 184, 186, 188, 191, 195, 201, 203]
-        cols_search = [2,3,4,7]
-        short_gen = general_search[general_search.columns[cols_general]]
-        short_search = search[search.columns[cols_search]]
+        # New query or use existing file?
+        if db_source == 'new':
+            """ Import csv files, truncate, and join """
+            # Read in files
+            general_search = pd.read_csv(r"C:\\Users\\MooTra\\Downloads\\general_search_2.0.csv")
+            search = pd.read_csv(r"C:\\Users\\MooTra\\Downloads\\subjects.csv")
 
-        # Join data frames
-        self.data = short_gen.join(short_search)
-        print("Created database")
-        print(f"Remaining candidates: {self.data.shape[0]}\n")
+            # Truncate to columns of interest
+            cols_general = [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 
+                            17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 
+                            31, 32, 33, 34, 35, 36, 38, 40, 42, 49, 51, 52, 87, 89, 
+                            108, 111, 112, 115, 120, 122, 123, 130, 132, 133, 150, 
+                            153, 154, 157, 162, 163, 164, 165, 169, 171, 172, 175, 
+                            176, 177, 178, 179, 184, 186, 188, 191, 195, 201, 203]
+            cols_search = [2,3,4,7]
+            short_gen = general_search[general_search.columns[cols_general]]
+            short_search = search[search.columns[cols_search]]
+
+            # Join data frames
+            self.data = short_gen.join(short_search)
+            print("Created database")
+            print(f"Remaining candidates: {self.data.shape[0]}\n")
+
+        elif db_source == 'old':
+            self.data = pd.read_csv("C:/Users/MooTra/Documents/Projects/EdgeMode/IRB/Recruiting/sub_db_free.csv")
+            print("Created database")
+            print(f"Remaining candidates: {self.data.shape[0]}\n")
 
         # Get rid of junk
         self._initial_scrub()
@@ -130,7 +139,7 @@ class SubDB:
         ax.set_yticks(ticks=yticks)
         ax.set_ylabel("Hearing Threshold (dB HL)")
         ax.semilogx()
-        ax.set_xlim((0,9500))
+        ax.set_xlim((200,9500))
         ax.set_xticks(ticks=[250,500,1000,2000,4000,8000], labels=['250','500','1000','2000','4000','8000'])
         ax.set_xlabel("Frequency (Hz)")
         #plt.axhline(y=25, color="black", linestyle='--', linewidth=1)

@@ -6,7 +6,7 @@ import audio_dict as a
 
 
 # Initialize database and do initial scrub
-db = m.SubDB()
+db = m.SubDB('new')
 
 # Filter by bilateral hearing aid use
 db.filter("Hearing AidUse", "==", "Binaural")

@@ -27,11 +27,12 @@ class App(tk.Tk):
         super().__init__(*args, **kwargs)
 
         self.title('Subject Browser')
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
+        self.resizable(0,0)
+        #self.columnconfigure(0, weight=1)
+        #self.rowconfigure(0, weight=1)
 
         # Load in database
-        self.db = m.SubDB()
+        self.db = m.SubDB("old")
 
         # Set up main window
         self.create_tree_widget()
@@ -93,17 +94,12 @@ class App(tk.Tk):
 
             # Call audio display function
             self._show_audio(record)
-
+            
 
     def _show_audio(self, record):
-        """ Trigger plot audiogram event """
-        #print("plot audio call sent from controller")
-        #self.event_generate('<<PlotAudio>>')
+        """ Retrieve figure axis handle and plot audio """
         ax1 = self.main_frame.plot_audio()
         self.db.audio_ac(record, ax1)
-        #x = self.db.audio_ac(record)
-        #x.show()
-        #self.main_frame.plot_audio(x)
 
 
 if __name__ == '__main__':

@@ -104,7 +104,9 @@ class SubDB:
         print(f"Remaining candidates: {self.data.shape[0]}\n")
 
 
-    def audio_ac(self, sub_id):
+    def audio_ac(self, sub_id, ax=None):
+        if ax is None:
+            ax = plt.gca()
         sides = ["RightAC", "LeftAC"]
         freqs = [250, 500, 1000, 2000, 4000, 8000]
         thresh = []
@@ -117,22 +119,23 @@ class SubDB:
                 # Convert column to int
                 #self.data[colname] = self.data[colname].astype("int64")
                 # Exclude thresholds above dict value
-                thresh.append(self.data[self.data['Subject Id'] == sub_id][colname])
+                thresh.append(self.data[self.data['Subject Id'] == sub_id][colname].astype(int))
         # Plot audiogram
-        plt.plot(freqs, thresh[0:6], color='red', marker='o')
-        plt.plot(freqs, thresh[6:12], color='blue', marker='x')
-        plt.ylim((-10,120))
-        plt.gca().invert_yaxis()
+        ax.plot(freqs, thresh[0:6], color='red', marker='o')
+        ax.plot(freqs, thresh[6:12], color='blue', marker='x')
+        ax.set_ylim((-10,120))
+        #plt.gca().invert_yaxis()
+        ax.invert_yaxis()
         yticks = range(-10,130,10)
-        plt.yticks(ticks=yticks)
-        plt.ylabel("Hearing Threshold (dB HL)")
-        plt.semilogx()
-        plt.xlim((0,9500))
-        plt.xticks(ticks=[250,500,1000,2000,4000,8000], labels=['250','500','1000','2000','4000','8000'])
-        plt.xlabel("Frequency (Hz)")
+        ax.set_yticks(ticks=yticks)
+        ax.set_ylabel("Hearing Threshold (dB HL)")
+        ax.semilogx()
+        ax.set_xlim((0,9500))
+        ax.set_xticks(ticks=[250,500,1000,2000,4000,8000], labels=['250','500','1000','2000','4000','8000'])
+        ax.set_xlabel("Frequency (Hz)")
         #plt.axhline(y=25, color="black", linestyle='--', linewidth=1)
-        plt.grid()
-        plt.title(f"Audiogram for Participant {sub_id}")
+        ax.grid()
+        ax.set_title(f"Audiogram for Participant {sub_id}")
 
         # Plot color regions
         audio_colors = ["gray", "green", "gold", "orange", "mediumpurple", "lightsalmon"]
@@ -149,9 +152,11 @@ class SubDB:
             coords = [[0,degree_dict[key][0]], [9500,degree_dict[key][0]], [9500,degree_dict[key][1]], [0,degree_dict[key][1]]]
             coords.append(coords[0]) # repeat the first point to create a 'closed loop'
             xs, ys = zip(*coords) # create lists of x and y values
-            plt.fill(xs,ys, edgecolor='none', facecolor=audio_colors[idx], alpha=alpha_val) 
+            ax.fill(xs,ys, edgecolor='none', facecolor=audio_colors[idx], alpha=alpha_val) 
 
-        plt.show()
+        #plt.show()
+        #return plt 
+        #plt.show()
 
 
     def show_all_audios(self):

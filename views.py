@@ -63,7 +63,7 @@ class MainFrame(ttk.Frame):
 
         # LEFT SIDE
         lfrm_left = ttk.LabelFrame(self, text="Left Side")
-        lfrm_left.grid(row=1, column=0, **options, sticky='e')
+        lfrm_left.grid(row=1, column=0, **options, sticky='nsew')
         # Style
         ttk.Label(lfrm_left, text="Style:").grid(row=0, column=0, sticky='e')
         ttk.Label(lfrm_left, textvariable=self._vars['l_style']).grid(row=0, column=1, sticky='w')
@@ -76,7 +76,7 @@ class MainFrame(ttk.Frame):
 
         # RIGHT SIDE
         lfrm_right = ttk.LabelFrame(self, text="Right Side")
-        lfrm_right.grid(row=1, column=1, **options, sticky='w')
+        lfrm_right.grid(row=1, column=1, **options, sticky='nsew')
         ttk.Label(lfrm_right, text="Style:").grid(row=0, column=0, sticky='e')
         ttk.Label(lfrm_right, textvariable=self._vars['r_style']).grid(row=0, column=1, sticky='w')
         # Coupling
@@ -85,6 +85,19 @@ class MainFrame(ttk.Frame):
         # Receiver length
         ttk.Label(lfrm_right, text="Receiver Length:").grid(row=2, column=0, sticky='e')
         ttk.Label(lfrm_right, textvariable=self._vars['r_receiver']).grid(row=2, column=1, sticky='w')
+
+        # Call audio plot
+        self.plot_audio()
+
+
+    def plot_audio(self):
+        """ Plot audiogram for selected subject """
+        figure = Figure(figsize=(5, 4), dpi=100)
+        figure_canvas = FigureCanvasTkAgg(figure, self)
+        ax1 = figure.add_subplot()
+        #xs = [random.randint(10,20) for i in range(0,4)]
+        figure_canvas.get_tk_widget().grid(row=10, column=0, columnspan=2, pady=10, padx=10)
+        return ax1
 
 
 class SubjectTree(tk.Frame):
@@ -95,7 +108,7 @@ class SubjectTree(tk.Frame):
         # Initialize
         self.db = db
         #self.columnconfigure(0, weight=1)
-        #self.rowconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
 
         # Tree
         # Get subs from dataframe

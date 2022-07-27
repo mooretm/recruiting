@@ -8,7 +8,7 @@
 # Import GUI packages
 import tkinter as tk
 from tkinter import ttk
-from tkinter.messagebox import showinfo
+from tkinter import messagebox
 
 # Import custom modules
 import models as m
@@ -21,14 +21,12 @@ matplotlib.use('TkAgg')
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
-import random
-
 
 class App(tk.Tk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.title('Treeview demo')
+        self.title('Subject Browser')
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
@@ -38,6 +36,7 @@ class App(tk.Tk):
         # Set up main window
         self.create_tree_widget()
         self.create_main_frame()
+        self.center_window()
 
 
     def create_tree_widget(self):
@@ -51,7 +50,20 @@ class App(tk.Tk):
         self.main_frame.grid(row=0, column=2)
 
 
+    def center_window(toplevel):
+        """ Center the root window """
+        toplevel.update_idletasks()
+        screen_width = toplevel.winfo_screenwidth()
+        screen_height = toplevel.winfo_screenheight()
+        size = tuple(int(_) for _ in toplevel.geometry().split('+')[0].split('x'))
+        x = screen_width/2 - size[0]/2
+        y = screen_height/2 - size[1]/2
+        toplevel.geometry("+%d+%d" % (x, y)) 
+
+
     def _item_selected(self, *_):
+        # Pack variables in dictionary and send dict to view
+        # Currently tight coupling by pointing to: self.main_frame._vars
         for selected_item in self.sub_tree.tree.selection():
             item = self.sub_tree.tree.item(selected_item)
             record = int(item['values'][0])
@@ -80,19 +92,18 @@ class App(tk.Tk):
             self.main_frame._vars['l_receiver'].set(self.db.data[self.db.data['Subject Id'] == record]['Left Ric Cable Size'].values[0])
 
             # Call audio display function
-            self._show_audio()
+            self._show_audio(record)
 
 
-    def _show_audio(self):
-        """ Plot audiogram for selected subject """
-        figure = Figure(figsize=(5, 5), dpi=100)
-        figure_canvas = FigureCanvasTkAgg(figure, self)
-        #NavigationToolbar2Tk(figure_canvas, self)
-        axes = figure.add_subplot()
-        xs = [random.randint(10,20) for i in range(0,4)]
-        axes.plot(xs, [5,6,7,8])
-        #db.audio_ac(str(record))
-        figure_canvas.get_tk_widget().grid(row=10, column=2)#(side=tk.TOP, fill=tk.BOTH, expand=True)
+    def _show_audio(self, record):
+        """ Trigger plot audiogram event """
+        #print("plot audio call sent from controller")
+        #self.event_generate('<<PlotAudio>>')
+        ax1 = self.main_frame.plot_audio()
+        self.db.audio_ac(record, ax1)
+        #x = self.db.audio_ac(record)
+        #x.show()
+        #self.main_frame.plot_audio(x)
 
 
 if __name__ == '__main__':

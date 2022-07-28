@@ -29,9 +29,6 @@ db.filter("Age", "<=", 75)
 # Filter by hearing thresholds
 db.ac_thresh_filt(a.Jingjing)
 
-# Plot audiograms
-#db.show_all_audios()
-
 # Write database to .csv
 #db.write()
 

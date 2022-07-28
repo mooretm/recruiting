@@ -1,4 +1,4 @@
-""" View for Recruiting Tool """
+""" View for Subject Browser """
 
 # Import GUI packages
 import tkinter as tk
@@ -12,26 +12,33 @@ matplotlib.use('TkAgg')
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
+# Import custom modules
+from constants import FieldTypes as FT
+
 
 class MainFrame(ttk.Frame):
-    def __init__(self, parent, *args, **kwargs):
+    """ Main window """
+
+    var_types = {
+        FT.string: tk.StringVar,
+        FT.string_list: tk.StringVar,
+        FT.short_string_list: tk.StringVar,
+        FT.iso_date_string: tk.StringVar,
+        FT.long_string: tk.StringVar,
+        FT.decimal: tk.DoubleVar,
+        FT.integer: tk.IntVar,
+        FT.boolean: tk.BooleanVar
+    }
+
+
+    def __init__(self, parent, model, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
 
+        self.model = model
+        fields = self.model.fields
         self._vars = {
-            'age': tk.IntVar(value=''),
-            'miles_away': tk.StringVar(),
-            'smartphone_type': tk.StringVar(),
-            'study_dates': tk.StringVar(),
-            'study_info': tk.StringVar(),
-            'study_dates': tk.StringVar(),
-            'will_not_wear': tk.StringVar(),
-
-            'r_style': tk.StringVar(),
-            'l_style': tk.StringVar(),
-            'r_coupling': tk.StringVar(),
-            'l_coupling': tk.StringVar(),
-            'r_receiver': tk.StringVar(),
-            'l_receiver': tk.StringVar(),
+            key: self.var_types[spec['type']]()
+            for key, spec in fields.items()
         }
 
         options = {'padx':10, 'pady':5}
@@ -89,6 +96,12 @@ class MainFrame(ttk.Frame):
         # Call audio plot
         self.plot_audio()
 
+
+    def load(self, data):
+        """ Display subject data in labels """
+        for key in data.keys():
+            self._vars[key].set(data[key])
+        
 
     def plot_audio(self):
         """ Create figure axis for audiogram plot """

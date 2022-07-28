@@ -1,10 +1,11 @@
 """ Sorting for subject recruitment """
 
 # Import data science packages
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
+
+# Import custom modules
+from constants import FieldTypes as FT
 
 
 class SubDB:
@@ -161,11 +162,7 @@ class SubDB:
             coords = [[0,degree_dict[key][0]], [9500,degree_dict[key][0]], [9500,degree_dict[key][1]], [0,degree_dict[key][1]]]
             coords.append(coords[0]) # repeat the first point to create a 'closed loop'
             xs, ys = zip(*coords) # create lists of x and y values
-            ax.fill(xs,ys, edgecolor='none', facecolor=audio_colors[idx], alpha=alpha_val) 
-
-        #plt.show()
-        #return plt 
-        #plt.show()
+            ax.fill(xs,ys, edgecolor='none', facecolor=audio_colors[idx], alpha=alpha_val)
 
 
     def show_all_audios(self):
@@ -177,4 +174,24 @@ class SubDB:
         # Plot each audio in succession
         for sub in subs:
             self.audio_ac(sub)
+
+
+class DataModel:
+    """ Handle subject db record data """
+    fields = {
+        "age": {'req': True, 'type': FT.string},
+        "miles_away": {'req': True, 'type': FT.string},
+        "smartphone_type": {'req': True, 'type': FT.string},
+        'study_dates': {'req': True, 'type': FT.string},
+        'study_info': {'req': True, 'type': FT.string},
+        'will_not_wear': {'req': True, 'type': FT.string},
+        'r_style': {'req': True, 'type': FT.string},
+        'l_style': {'req': True, 'type': FT.string},
+        'r_coupling': {'req': True, 'type': FT.string},
+        'l_coupling': {'req': True, 'type': FT.string},
+        'r_receiver': {'req': True, 'type': FT.string},
+        'l_receiver': {'req': True, 'type': FT.string},
+    }
+
+
 

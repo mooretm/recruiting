@@ -102,6 +102,12 @@ class App(tk.Tk):
             self._vars['r_receiver'] = self.db.data[self.db.data['Subject Id'] == record]['Right Ric Cable Size'].values[0]
             self._vars['l_receiver'] = self.db.data[self.db.data['Subject Id'] == record]['Left Ric Cable Size'].values[0]
 
+            coupling, vent_size = self.db.coupling(record)
+            self._vars['r_rec_coupling'] = coupling['Right']
+            self._vars['l_rec_coupling'] = coupling['Left']
+            self._vars['r_rec_vent'] = vent_size['Right']
+            self._vars['l_rec_vent'] = vent_size['Left']
+
             # Send db data to View labels to display
             self.main_frame.load(self._vars)
 

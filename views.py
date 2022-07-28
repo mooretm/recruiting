@@ -41,6 +41,9 @@ class MainFrame(ttk.Frame):
             for key, spec in fields.items()
         }
 
+        style = ttk.Style()
+        style.configure("rec.TLabel", foreground='green')
+
         options = {'padx':10, 'pady':5}
         data_options = {'padx':(5,20)}
 
@@ -71,27 +74,41 @@ class MainFrame(ttk.Frame):
         # LEFT SIDE
         lfrm_left = ttk.LabelFrame(self, text="Left Side")
         lfrm_left.grid(row=1, column=0, **options, sticky='nsew')
-        # Style
-        ttk.Label(lfrm_left, text="Style:").grid(row=0, column=0, sticky='e')
+        # Device
+        ttk.Label(lfrm_left, text="Device:").grid(row=0, column=0, sticky='e')
         ttk.Label(lfrm_left, textvariable=self._vars['l_style']).grid(row=0, column=1, sticky='w')
-        # Coupling
-        ttk.Label(lfrm_left, text="Coupling:").grid(row=1, column=0, sticky='e')
-        ttk.Label(lfrm_left, textvariable=self._vars['l_coupling']).grid(row=1, column=1, sticky='w')
         # Receiver length
-        ttk.Label(lfrm_left, text="Receiver Length:").grid(row=2, column=0, sticky='e')
-        ttk.Label(lfrm_left, textvariable=self._vars['l_receiver']).grid(row=2, column=1, sticky='w')
+        ttk.Label(lfrm_left, text="Receiver Length:").grid(row=1, column=0, sticky='e')
+        ttk.Label(lfrm_left, textvariable=self._vars['l_receiver']).grid(row=1, column=1, sticky='w')
+        # Coupling
+        ttk.Label(lfrm_left, text="Current Coupling:").grid(row=2, column=0, sticky='e')
+        ttk.Label(lfrm_left, textvariable=self._vars['l_coupling']).grid(row=2, column=1, sticky='w')
+        # ProFit suggested coupling
+        ttk.Label(lfrm_left, text="Suggested Coupling:", style='rec.TLabel').grid(row=3, column=0, sticky='e')
+        ttk.Label(lfrm_left, textvariable=self._vars['l_rec_coupling'], style='rec.TLabel').grid(row=3, column=1, sticky='w')
+        # ProFit suggested vent size
+        ttk.Label(lfrm_left, text="Suggested Vent Size:", style='rec.TLabel').grid(row=4, column=0, sticky='e')
+        ttk.Label(lfrm_left, textvariable=self._vars['l_rec_vent'], style='rec.TLabel').grid(row=4, column=1, sticky='w')
 
         # RIGHT SIDE
         lfrm_right = ttk.LabelFrame(self, text="Right Side")
         lfrm_right.grid(row=1, column=1, **options, sticky='nsew')
-        ttk.Label(lfrm_right, text="Style:").grid(row=0, column=0, sticky='e')
+        # Device
+        ttk.Label(lfrm_right, text="Device:").grid(row=0, column=0, sticky='e')
         ttk.Label(lfrm_right, textvariable=self._vars['r_style']).grid(row=0, column=1, sticky='w')
-        # Coupling
-        ttk.Label(lfrm_right, text="Coupling:").grid(row=1, column=0, sticky='e')
-        ttk.Label(lfrm_right, textvariable=self._vars['r_coupling']).grid(row=1, column=1, sticky='w')
         # Receiver length
-        ttk.Label(lfrm_right, text="Receiver Length:").grid(row=2, column=0, sticky='e')
-        ttk.Label(lfrm_right, textvariable=self._vars['r_receiver']).grid(row=2, column=1, sticky='w')
+        ttk.Label(lfrm_right, text="Receiver Length:").grid(row=1, column=0, sticky='e')
+        ttk.Label(lfrm_right, textvariable=self._vars['r_receiver']).grid(row=1, column=1, sticky='w')
+        # Coupling
+        ttk.Label(lfrm_right, text="Current Coupling:").grid(row=2, column=0, sticky='e')
+        ttk.Label(lfrm_right, textvariable=self._vars['r_coupling']).grid(row=2, column=1, sticky='w')
+        # ProFit suggested coupling
+        ttk.Label(lfrm_right, text="Suggested Coupling:", style='rec.TLabel').grid(row=3, column=0, sticky='e')
+        ttk.Label(lfrm_right, textvariable=self._vars['r_rec_coupling'], style='rec.TLabel').grid(row=3, column=1, sticky='w')
+        # ProFit suggested vent size
+        ttk.Label(lfrm_right, text="Suggested Vent Size:", style='rec.TLabel').grid(row=4, column=0, sticky='e')
+        ttk.Label(lfrm_right, textvariable=self._vars['r_rec_vent'], style='rec.TLabel').grid(row=4, column=1, sticky='w')
+
 
         # Call audio plot
         self.plot_audio()

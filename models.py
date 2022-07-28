@@ -1,6 +1,7 @@
 """ Sorting for subject recruitment """
 
 # Import data science packages
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -22,7 +23,8 @@ class SubDB:
             # Truncate to columns of interest
             cols_general = [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 
                             17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 
-                            31, 32, 33, 34, 35, 36, 38, 40, 42, 49, 51, 52, 87, 89, 
+                            31, 32, 33, 34, 35, 36, 38, 40, 42, 49, 51, 52, 87, 89,
+                            100,101,102,103,
                             108, 111, 112, 115, 120, 122, 123, 130, 132, 133, 150, 
                             153, 154, 157, 162, 163, 164, 165, 169, 171, 172, 175, 
                             176, 177, 178, 179, 184, 186, 188, 191, 195, 201, 203]
@@ -32,6 +34,19 @@ class SubDB:
 
             # Join data frames
             self.data = short_gen.join(short_search)
+
+            # Correct column names
+            self.data.rename(columns = {
+                'L Pt Bc 1000':'LeftBC 1000',
+                'L Pt Bc 2000':'LeftBC 2000',
+                'L Pt Bc 4000':'LeftBC 4000',
+                'L Pt Bc 500':'LeftBC 500',
+                'RightBC  1000':'RightBC 1000',
+                'RightBC  2000':'RightBC 2000',
+                'RightBC  4000':'RightBC 4000'
+                }, inplace = True
+            )
+
             print("Created database")
             print(f"Remaining candidates: {self.data.shape[0]}\n")
 
@@ -114,6 +129,36 @@ class SubDB:
         print(f"Remaining candidates: {self.data.shape[0]}\n")
 
 
+    def get_thresholds(self, sub_id):
+        """ Make a dictionary of subject thresholds """
+        # Get AC thresholds
+        sides = ["RightAC", "LeftAC"]
+        freqs = [250, 500, 1000, 2000, 4000, 8000]
+        ac = {}
+        for side in sides:
+            for freq in freqs:
+                colname = side + " " + str(freq)
+                #ac.append(self.data[self.data['Subject Id'] == sub_id][colname].astype(int))
+                try:
+                    ac[side + ' ' + str(freq)] = int(self.data[self.data['Subject Id'] == sub_id][colname].values[0])
+                except: 
+                    ac[side + ' ' + str(freq)] = None
+
+        # Get BC thresholds
+        sides = ["RightBC", "LeftBC"]
+        freqs = [500, 1000, 2000, 4000]
+        bc = {}
+        for side in sides:
+            for freq in freqs:
+                colname = side + " " + str(freq)
+                try:
+                    bc[side + ' ' + str(freq)] = int(self.data[self.data['Subject Id'] == sub_id][colname].values[0])
+                except:
+                    bc[side + ' ' + str(freq)] = None
+
+        return ac, bc
+
+
     def audio_ac(self, sub_id, ax=None):
         if ax is None:
             ax = plt.gca()
@@ -176,6 +221,42 @@ class SubDB:
             self.audio_ac(sub)
 
 
+    def coupling(self, sub_id):
+        """ Return ProFit recommended coupling and vent size"""
+
+        # Get subject thresholds
+        ac, bc = self.get_thresholds(sub_id)
+
+        # RIC coupling logic
+        sides = ['RightAC ', 'LeftAC ']
+        coupling = {}
+        vent_size = {}
+        for side in sides:
+            if (ac[side + '250'] and ac[side + '500'] < 30) and (ac[side + '1000'] <= 60):
+                coupling[side[:-3]] = 'Open Dome'
+            elif (ac[side + '250'] or ac[side + '500'] > 30) and (ac[side + '250'] or ac[side + '500'] <= 50) and (ac[side + '1000'] <= 60):
+                coupling[side[:-3]] = 'Occluded Dome'
+            elif (ac['RightAC 250'] or ac['RightAC 500'] < 50) or (ac[side + '1000'] > 60):
+                coupling[side[:-3]] = 'Earmold'
+
+            # Vent size
+            if coupling[side[:-3]] == 'Earmold':
+                # Get average threshold at 500 and 1000 Hz
+                avg500_1k = np.mean([ac[side + '500'], ac[side + '1000']])
+                if avg500_1k <= 40:
+                    vent_size[side[:-3]] = 'Large'
+                elif avg500_1k < 55:
+                    vent_size[side[:-3]] = 'Medium'
+                elif avg500_1k >= 55:
+                    vent_size[side[:-3]] = 'Small'
+                else:
+                    vent_size[side[:-3]] = 'Models_253: Calculation Error!'
+            else:
+                vent_size[side[:-3]] = 'NA'
+
+        return coupling, vent_size
+
+
 class DataModel:
     """ Handle subject db record data """
     fields = {
@@ -187,11 +268,12 @@ class DataModel:
         'will_not_wear': {'req': True, 'type': FT.string},
         'r_style': {'req': True, 'type': FT.string},
         'l_style': {'req': True, 'type': FT.string},
-        'r_coupling': {'req': True, 'type': FT.string},
-        'l_coupling': {'req': True, 'type': FT.string},
         'r_receiver': {'req': True, 'type': FT.string},
         'l_receiver': {'req': True, 'type': FT.string},
+        'r_coupling': {'req': True, 'type': FT.string},
+        'l_coupling': {'req': True, 'type': FT.string},
+        'r_rec_coupling': {'req': True, 'type': FT.string},
+        'l_rec_coupling': {'req': True, 'type': FT.string},
+        'r_rec_vent': {'req': True, 'type': FT.string},
+        'l_rec_vent': {'req': True, 'type': FT.string},
     }
-
-
-

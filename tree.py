@@ -37,7 +37,7 @@ class App(tk.Tk):
         self.resizable(0,0)
 
         # Load in database
-        self.db = m.SubDB("old")
+        self.db = m.SubDB("new")
 
         # Load in dict fields for displaying records
         self.model = m.DataModel()
@@ -76,6 +76,9 @@ class App(tk.Tk):
 
 
     def _item_selected(self, *_):
+        """ Get selected subject number from tree 
+            and retrieve subject data
+        """
         for selected_item in self.sub_tree.tree.selection():
             item = self.sub_tree.tree.item(selected_item)
             record = int(item['values'][0])

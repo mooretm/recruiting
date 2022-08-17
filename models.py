@@ -17,8 +17,42 @@ class SubDB:
         if db_source == 'new':
             """ Import csv files, truncate, and join """
             # Read in files
-            general_search = pd.read_csv(r"C:\\Users\\MooTra\\Downloads\\general_search_2.0.csv")
-            search = pd.read_csv(r"C:\\Users\\MooTra\\Downloads\\subjects.csv")
+            general_search = pd.read_csv("C:\\Users\\MooTra\\Downloads\\general_search_2.0.csv")
+            search = pd.read_csv("C:\\Users\\MooTra\\Downloads\\subjects.csv")
+
+
+            """ Testing... """
+            print('-' * 80)
+            print('TESTS:')
+            flags = []
+            # Test whether databases are the same length
+            print("Testing database lengths...")
+            if general_search.shape[0] != search.shape[0]:
+                print("Oh come on! Databases are not the same length!\n")
+                flags.append(1)
+            else:
+                print("Passed!")
+
+            # Test whether subject IDs match
+            # across the two databases
+            bools = general_search.iloc[0:len(search), 0] == search.iloc[:, 0]
+            true_vals = list(bools).count(True)
+            print("Testing whether subject IDs match across databases...")
+            if true_vals != len(search):
+                print("Record ID mismatches found!")
+                print(f"{true_vals} records match of {len(search)}\n")
+                flags.append(1)
+            else:
+                print("Passed!")
+
+            # Summarize results
+            print("Summary:")
+            if not flags:
+                print("All tests passed!")
+            else:
+                print("Please address failed tests!")
+            print('-' * 80)
+
 
             # Truncate to columns of interest
             cols_general = [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 
@@ -210,15 +244,15 @@ class SubDB:
             ax.fill(xs,ys, edgecolor='none', facecolor=audio_colors[idx], alpha=alpha_val)
 
 
-    def show_all_audios(self):
-        """ Show all audiograms for participants 
-            in database
-        """
-        # Get remaining subject ids
-        subs = self.data["Subject Id"]
-        # Plot each audio in succession
-        for sub in subs:
-            self.audio_ac(sub)
+    # def show_all_audios(self):
+    #     """ Show all audiograms for participants 
+    #         in database
+    #     """
+    #     # Get remaining subject ids
+    #     subs = self.data["Subject Id"]
+    #     # Plot each audio in succession
+    #     for sub in subs:
+    #         self.audio_ac(sub)
 
 
     def coupling(self, sub_id):

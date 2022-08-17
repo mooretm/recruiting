@@ -81,6 +81,11 @@ class SubDB:
                 }, inplace = True
             )
 
+            # Sort dataframe by subject ID
+            self.data = self.data.sort_values(by='Subject Id')
+
+
+
             print("Created database")
             print(f"Remaining candidates: {self.data.shape[0]}\n")
 
@@ -167,7 +172,7 @@ class SubDB:
         """ Make a dictionary of subject thresholds """
         # Get AC thresholds
         sides = ["RightAC", "LeftAC"]
-        freqs = [250, 500, 1000, 2000, 4000, 8000]
+        freqs = [250, 500, 750, 1000, 1500, 2000, 3000, 4000, 6000, 8000]
         ac = {}
         for side in sides:
             for freq in freqs:
@@ -175,7 +180,7 @@ class SubDB:
                 #ac.append(self.data[self.data['Subject Id'] == sub_id][colname].astype(int))
                 try:
                     ac[side + ' ' + str(freq)] = int(self.data[self.data['Subject Id'] == sub_id][colname].values[0])
-                except: 
+                except:
                     ac[side + ' ' + str(freq)] = None
 
         # Get BC thresholds
@@ -196,24 +201,76 @@ class SubDB:
     def audio_ac(self, sub_id, ax=None):
         if ax is None:
             ax = plt.gca()
-        sides = ["RightAC", "LeftAC"]
-        freqs = [250, 500, 1000, 2000, 4000, 8000]
-        thresh = []
-        for side in sides:
-            for freq in freqs:
-                # Construct column name
-                colname = side + " " + str(freq)
-                # Remove rows containing "-" (i.e., no data)
-                #self.data = self.data[self.data[colname] != "-"]
-                # Convert column to int
-                #self.data[colname] = self.data[colname].astype("int64")
-                # Exclude thresholds above dict value
-                thresh.append(self.data[self.data['Subject Id'] == sub_id][colname].astype(int))
-        # Plot audiogram
-        ax.plot(freqs, thresh[0:6], color='red', marker='o')
-        ax.plot(freqs, thresh[6:12], color='blue', marker='x')
+
+
+        # sides = ["RightAC", "LeftAC"]
+        # freqs = [250, 500, 1000, 2000, 4000, 8000]
+        # thresh = []
+        # for side in sides:
+        #     for freq in freqs:
+        #         # Construct column name
+        #         colname = side + " " + str(freq)
+        #         # Remove rows containing "-" (i.e., no data)
+        #         #self.data = self.data[self.data[colname] != "-"]
+        #         # Convert column to int
+        #         #self.data[colname] = self.data[colname].astype("int64")
+        #         # Exclude thresholds above dict value
+        #         thresh.append(self.data[self.data['Subject Id'] == sub_id][colname].astype(int))
+
+
+        ac, bc = self.get_thresholds(sub_id)
+        thresholds = (ac, bc)
+
+        # Remove "None" values from thresholds
+        for ii in range(0,2):
+            for key, value in dict(thresholds[ii]).items():
+                if value is None:
+                    del thresholds[ii][key]
+
+        # Plot audiogram: METHOD 1
+        # Plot AC thresholds
+        # for key, value in dict(ac).items():
+        #     if "Right" in key:
+        #         print(key, value)
+        #         ax.plot(int(key.split()[1]), value, color='red', marker='o')
+        #     elif "Left" in key:
+        #         ax.plot(int(key.split()[1]), value, color='blue', marker='x')
+        
+        # Plot audiogram: METHOD 2
+        # Plot AC thresholds
+        # keys = ac.keys()
+        # right_ac_freqs = []
+        # right_ac_thresh = []
+        # left_ac_freqs = []
+        # left_ac_thresh = []
+        # for key in keys:
+        #     if "Right" in key:
+        #         right_ac_freqs.append((int(key.split()[1])))
+        #         right_ac_thresh.append(ac[key])
+        #     elif "Left" in key:
+        #         left_ac_freqs.append((int(key.split()[1])))
+        #         left_ac_thresh.append(ac[key])
+        
+        # Plot audiogram: METHOD 3
+        # Plot AC thresholds
+        x = list(ac.items())
+        right_ac_freqs = [int(j[0].split()[1]) for j in x if 'Right' in j[0]]
+        right_ac_thresh = [j[1] for j in x if 'Right' in j[0]]
+        left_ac_freqs = [int(j[0].split()[1]) for j in x if 'Left' in j[0]]
+        left_ac_thresh = [j[1] for j in x if 'Left' in j[0]]
+        ax.plot(right_ac_freqs, right_ac_thresh, 'ro-')
+        ax.plot(left_ac_freqs, left_ac_thresh, 'bx-')
+
+        # Plot BC thresholds
+        x = list(bc.items())
+        right_bc_freqs = [int(j[0].split()[1]) for j in x if 'Right' in j[0]]
+        right_bc_thresh = [j[1] for j in x if 'Right' in j[0]]
+        left_bc_freqs = [int(j[0].split()[1]) for j in x if 'Left' in j[0]]
+        left_bc_thresh = [j[1] for j in x if 'Left' in j[0]]
+        ax.plot(right_bc_freqs, right_bc_thresh, marker=8, c='red', linestyle='None')
+        ax.plot(left_bc_freqs, left_bc_thresh, marker=9, c='blue', linestyle='None')
+
         ax.set_ylim((-10,120))
-        #plt.gca().invert_yaxis()
         ax.invert_yaxis()
         yticks = range(-10,130,10)
         ax.set_yticks(ticks=yticks)
@@ -222,7 +279,7 @@ class SubDB:
         ax.set_xlim((200,9500))
         ax.set_xticks(ticks=[250,500,1000,2000,4000,8000], labels=['250','500','1000','2000','4000','8000'])
         ax.set_xlabel("Frequency (Hz)")
-        #plt.axhline(y=25, color="black", linestyle='--', linewidth=1)
+        ax.axhline(y=25, color="black", linestyle='--', linewidth=1)
         ax.grid()
         ax.set_title(f"Audiogram for Participant {sub_id}")
 
@@ -270,7 +327,8 @@ class SubDB:
                 coupling[side[:-3]] = 'Open Dome'
             elif (ac[side + '250'] or ac[side + '500'] > 30) and (ac[side + '250'] or ac[side + '500'] <= 50) and (ac[side + '1000'] <= 60):
                 coupling[side[:-3]] = 'Occluded Dome'
-            elif (ac['RightAC 250'] or ac['RightAC 500'] < 50) or (ac[side + '1000'] > 60):
+            #elif (ac['RightAC 250'] or ac['RightAC 500'] < 50) or (ac[side + '1000'] > 60):
+            elif (ac[side + '250'] or ac[side + '500'] < 50) or (ac[side + '1000'] > 60):
                 coupling[side[:-3]] = 'Earmold'
 
             # Vent size

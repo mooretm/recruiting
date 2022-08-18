@@ -1,9 +1,17 @@
-""" Sorting for subject recruitment """
+"""Custom class for the subject recruiting database .csv export
+
+    Author: Travis M. Moore
+    Created: 1 Aug, 2022
+    Last Edited: 18 Aug, 2022
+ """
 
 # Import data science packages
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
+#import system packages
+import datetime
 
 # Import custom modules
 from constants import FieldTypes as FT
@@ -11,66 +19,29 @@ from constants import FieldTypes as FT
 
 class SubDB:
     def __init__(self, db_source):
-        """ Load in database records """
-
+        """ Load in database records, calculate age 
+        """
         # New query or use existing file?
         if db_source == 'new':
-            """ Import csv files, truncate, and join """
-            # Read in files
+            # Import .csv file of database records
             general_search = pd.read_csv("C:\\Users\\MooTra\\Downloads\\general_search_2.0.csv")
-            search = pd.read_csv("C:\\Users\\MooTra\\Downloads\\subjects.csv")
-
-
-            """ Testing... """
-            print('-' * 80)
-            print('TESTS:')
-            flags = []
-            # Test whether databases are the same length
-            print("Testing database lengths...")
-            if general_search.shape[0] != search.shape[0]:
-                print("Oh come on! Databases are not the same length!\n")
-                flags.append(1)
-            else:
-                print("Passed!")
-
-            # Test whether subject IDs match
-            # across the two databases
-            bools = general_search.iloc[0:len(search), 0] == search.iloc[:, 0]
-            true_vals = list(bools).count(True)
-            print("Testing whether subject IDs match across databases...")
-            if true_vals != len(search):
-                print("Record ID mismatches found!")
-                print(f"{true_vals} records match of {len(search)}\n")
-                flags.append(1)
-            else:
-                print("Passed!")
-
-            # Summarize results
-            print("Summary:")
-            if not flags:
-                print("All tests passed!")
-            else:
-                print("Please address failed tests!")
-            print('-' * 80)
-
 
             # Truncate to columns of interest
             cols_general = [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 
                             17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 
-                            31, 32, 33, 34, 35, 36, 38, 40, 42, 49, 51, 52, 87, 89,
-                            100,101,102,103,
-                            108, 111, 112, 115, 120, 122, 123, 130, 132, 133, 150, 
-                            153, 154, 157, 162, 163, 164, 165, 169, 171, 172, 175, 
-                            176, 177, 178, 179, 184, 186, 188, 191, 195, 201, 203]
-            cols_search = [2,3,4,7]
-            short_gen = general_search[general_search.columns[cols_general]]
-            short_search = search[search.columns[cols_search]]
+                            31, 32, 33, 34, 35, 36, 38, 40, 42, 49, 51, 52, 74, 85, 
+                            86, 88, 90, 101,102,103,104, 109, 112, 113, 116, 121, 
+                            123, 124, 131, 132, 133, 134, 151, 
+                            154, 155, 158, 163, 164, 165, 166, 170, 172, 173, 176, 
+                            177, 178, 179, 180, 185, 187, 189, 192, 196, 202, 204]
 
-            # Join data frames
-            self.data = short_gen.join(short_search)
+            # New dataframe with columns of interest only
+            general_search = general_search[general_search.columns[cols_general]]
+
+            short_gen = general_search
 
             # Correct column names
-            self.data.rename(columns = {
+            short_gen.rename(columns = {
                 'L Pt Bc 1000':'LeftBC 1000',
                 'L Pt Bc 2000':'LeftBC 2000',
                 'L Pt Bc 4000':'LeftBC 4000',
@@ -81,21 +52,38 @@ class SubDB:
                 }, inplace = True
             )
 
+            # Calculate age and store in new dataframe column
+            short_gen['Age'] = short_gen['Date Of Birth'].apply(lambda x: self.calc_age(x))
+
             # Sort dataframe by subject ID
-            self.data = self.data.sort_values(by='Subject Id')
+            self.data = short_gen.sort_values(by='Subject Id').reset_index(drop=True)
 
-
-
-            print("Created database")
+            # Provide feedback
+            print("Loaded database records")
             print(f"Remaining candidates: {self.data.shape[0]}\n")
 
         elif db_source == 'old':
             self.data = pd.read_csv("C:/Users/MooTra/Documents/Projects/EdgeMode/IRB/Recruiting/sub_db_free.csv")
-            print("Created database")
+            print("Loaded database records")
             print(f"Remaining candidates: {self.data.shape[0]}\n")
 
         # Get rid of junk
         self._initial_scrub()
+
+
+    def calc_age(self, birthdate):
+        today = datetime.datetime.now()
+        x = str(birthdate).split('/')
+        try:
+            birth = datetime.datetime(int(x[2]), int(x[0]), int(x[1]))
+            age = int((today - birth).days / 365.2425)
+        except TypeError:
+            age = '-'
+        except IndexError:
+            age = '-'
+        except ValueError:
+            age = '-'
+        return age
 
 
     def write(self):
@@ -202,22 +190,7 @@ class SubDB:
         if ax is None:
             ax = plt.gca()
 
-
-        # sides = ["RightAC", "LeftAC"]
-        # freqs = [250, 500, 1000, 2000, 4000, 8000]
-        # thresh = []
-        # for side in sides:
-        #     for freq in freqs:
-        #         # Construct column name
-        #         colname = side + " " + str(freq)
-        #         # Remove rows containing "-" (i.e., no data)
-        #         #self.data = self.data[self.data[colname] != "-"]
-        #         # Convert column to int
-        #         #self.data[colname] = self.data[colname].astype("int64")
-        #         # Exclude thresholds above dict value
-        #         thresh.append(self.data[self.data['Subject Id'] == sub_id][colname].astype(int))
-
-
+        # Get AC and BC thresholds
         ac, bc = self.get_thresholds(sub_id)
         thresholds = (ac, bc)
 
@@ -270,6 +243,7 @@ class SubDB:
         ax.plot(right_bc_freqs, right_bc_thresh, marker=8, c='red', linestyle='None')
         ax.plot(left_bc_freqs, left_bc_thresh, marker=9, c='blue', linestyle='None')
 
+        # Plot formatting
         ax.set_ylim((-10,120))
         ax.invert_yaxis()
         yticks = range(-10,130,10)
@@ -323,13 +297,16 @@ class SubDB:
         coupling = {}
         vent_size = {}
         for side in sides:
-            if (ac[side + '250'] and ac[side + '500'] < 30) and (ac[side + '1000'] <= 60):
-                coupling[side[:-3]] = 'Open Dome'
-            elif (ac[side + '250'] or ac[side + '500'] > 30) and (ac[side + '250'] or ac[side + '500'] <= 50) and (ac[side + '1000'] <= 60):
-                coupling[side[:-3]] = 'Occluded Dome'
-            #elif (ac['RightAC 250'] or ac['RightAC 500'] < 50) or (ac[side + '1000'] > 60):
-            elif (ac[side + '250'] or ac[side + '500'] < 50) or (ac[side + '1000'] > 60):
-                coupling[side[:-3]] = 'Earmold'
+            try:
+                if (ac[side + '250'] and ac[side + '500'] < 30) and (ac[side + '1000'] <= 60):
+                    coupling[side[:-3]] = 'Open Dome'
+                elif (ac[side + '250'] or ac[side + '500'] > 30) and (ac[side + '250'] or ac[side + '500'] <= 50) and (ac[side + '1000'] <= 60):
+                    coupling[side[:-3]] = 'Occluded Dome'
+                #elif (ac['RightAC 250'] or ac['RightAC 500'] < 50) or (ac[side + '1000'] > 60):
+                elif (ac[side + '250'] or ac[side + '500'] < 50) or (ac[side + '1000'] > 60):
+                    coupling[side[:-3]] = 'Earmold'
+            except TypeError:
+                coupling[side[:-3]] = '-'
 
             # Vent size
             if coupling[side[:-3]] == 'Earmold':

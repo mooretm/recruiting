@@ -84,10 +84,10 @@ class MainFrame(ttk.Frame):
         ttk.Label(lfrm_left, text="Current Coupling:").grid(row=2, column=0, sticky='e')
         ttk.Label(lfrm_left, textvariable=self._vars['l_coupling']).grid(row=2, column=1, sticky='w')
         # ProFit suggested coupling
-        ttk.Label(lfrm_left, text="Suggested Coupling:", style='rec.TLabel').grid(row=3, column=0, sticky='e')
+        ttk.Label(lfrm_left, text="Pro Fit Coupling:", style='rec.TLabel').grid(row=3, column=0, sticky='e')
         ttk.Label(lfrm_left, textvariable=self._vars['l_rec_coupling'], style='rec.TLabel').grid(row=3, column=1, sticky='w')
         # ProFit suggested vent size
-        ttk.Label(lfrm_left, text="Suggested Vent Size:", style='rec.TLabel').grid(row=4, column=0, sticky='e')
+        ttk.Label(lfrm_left, text="Pro Fit Vent Size:", style='rec.TLabel').grid(row=4, column=0, sticky='e')
         ttk.Label(lfrm_left, textvariable=self._vars['l_rec_vent'], style='rec.TLabel').grid(row=4, column=1, sticky='w')
 
         # RIGHT SIDE
@@ -103,10 +103,10 @@ class MainFrame(ttk.Frame):
         ttk.Label(lfrm_right, text="Current Coupling:").grid(row=2, column=0, sticky='e')
         ttk.Label(lfrm_right, textvariable=self._vars['r_coupling']).grid(row=2, column=1, sticky='w')
         # ProFit suggested coupling
-        ttk.Label(lfrm_right, text="Suggested Coupling:", style='rec.TLabel').grid(row=3, column=0, sticky='e')
+        ttk.Label(lfrm_right, text="Pro Fit Coupling:", style='rec.TLabel').grid(row=3, column=0, sticky='e')
         ttk.Label(lfrm_right, textvariable=self._vars['r_rec_coupling'], style='rec.TLabel').grid(row=3, column=1, sticky='w')
         # ProFit suggested vent size
-        ttk.Label(lfrm_right, text="Suggested Vent Size:", style='rec.TLabel').grid(row=4, column=0, sticky='e')
+        ttk.Label(lfrm_right, text="Pro Fit Vent Size:", style='rec.TLabel').grid(row=4, column=0, sticky='e')
         ttk.Label(lfrm_right, textvariable=self._vars['r_rec_vent'], style='rec.TLabel').grid(row=4, column=1, sticky='w')
 
 

@@ -319,7 +319,7 @@ class SubDB:
                 elif avg500_1k >= 55:
                     vent_size[side[:-3]] = 'Small'
                 else:
-                    vent_size[side[:-3]] = 'Models_253: Calculation Error!'
+                    vent_size[side[:-3]] = 'Models_322: Calculation Error!'
             else:
                 vent_size[side[:-3]] = 'NA'
 

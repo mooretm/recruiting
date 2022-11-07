@@ -1,10 +1,11 @@
 """ View for Subject Browser """
 
+###########
+# Imports #
+###########
 # Import GUI packages
 import tkinter as tk
 from tkinter import ttk
-from tkinter import filedialog
-from tkinter.simpledialog import Dialog
 
 # Import plotting packages
 import matplotlib
@@ -13,12 +14,17 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
 # Import custom modules
-from constants import FieldTypes as FT
+from models.constants import FieldTypes as FT
 
 
-class MainFrame(ttk.Frame):
-    """ Main window """
+#########
+# BEGIN #
+#########
+class BrowseFrame(ttk.Frame):
+    """ Browsing view for 'Browse' tab of notebook
+    """
 
+    # Define data types
     var_types = {
         FT.string: tk.StringVar,
         FT.string_list: tk.StringVar,
@@ -31,11 +37,11 @@ class MainFrame(ttk.Frame):
     }
 
 
-    def __init__(self, parent, model, *args, **kwargs):
+    def __init__(self, parent, dbmodel, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
 
-        self.model = model
-        fields = self.model.fields
+        self.dbmodel = dbmodel
+        fields = self.dbmodel.fields
         self._vars = {
             key: self.var_types[spec['type']]()
             for key, spec in fields.items()
@@ -109,60 +115,25 @@ class MainFrame(ttk.Frame):
         ttk.Label(lfrm_right, text="Pro Fit Vent Size:", style='rec.TLabel').grid(row=4, column=0, sticky='e')
         ttk.Label(lfrm_right, textvariable=self._vars['r_rec_vent'], style='rec.TLabel').grid(row=4, column=1, sticky='w')
 
-
         # Call audio plot
         self.plot_audio()
 
 
+    #############
+    # Functions #
+    #############
     def load(self, data):
-        """ Display subject data in labels """
+        """ Display subject data in labels
+        """
         for key in data.keys():
             self._vars[key].set(data[key])
         
 
     def plot_audio(self):
-        """ Create figure axis for audiogram plot """
+        """ Create figure axis for audiogram plot
+        """
         figure = Figure(figsize=(5, 4), dpi=100)
         figure_canvas = FigureCanvasTkAgg(figure, self)
         ax1 = figure.add_subplot()
         figure_canvas.get_tk_widget().grid(row=10, column=0, columnspan=2, pady=10, padx=10)
         return ax1
-
-
-class SubjectTree(tk.Frame):
-    """ Treeview for database subjects """
-    def __init__(self, parent, db, *args, **kwargs):
-        super().__init__(parent, *args, **kwargs)
-        
-        style = ttk.Style()
-        style.configure("new.Treeview", highlightthickness=5, bd=4)
-        style.configure("new.Treeview.Heading", font=('TkDefaultFont', 10, 'bold'))
-        style.configure("new.Vertical.TScrollbar")
-
-        # Initialize
-        self.db = db
-        self.rowconfigure(0, weight=1)
-
-        # Tree
-        # Get subs from dataframe
-        subjects = self.db.data['Subject Id']
-        columns = ('subject_id')
-        self.tree = ttk.Treeview(self, columns=columns, show='headings', height=20, style='new.Treeview')
-        self.tree.column("# 1", width=100, anchor=tk.CENTER)
-        self.tree.heading('subject_id', text='Subject ID')
-        self.tree.grid(row=0, column=0, sticky='nsew')
-        self.tree.bind('<<TreeviewSelect>>', self._item_selected)
-
-        # Scrollbar
-        self.scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, command=self.tree.yview, style='new.Vertical.TScrollbar')
-        self.tree.configure(yscroll=self.scrollbar.set)
-        self.scrollbar.grid(row=0, rowspan=10, column=1, sticky='ns')
-
-        # Add subjects to tree
-        for subject in subjects:
-            self.tree.insert('', tk.END, values=subject)
-
-
-    def _item_selected(self, *args):
-        """ Trigger event that tree item was selected """
-        self.event_generate('<<TreeviewSelect>>')

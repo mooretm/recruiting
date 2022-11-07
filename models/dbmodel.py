@@ -1,23 +1,35 @@
-"""Custom class for the subject recruiting database .csv export
+""" Database model for the Subject Browser 
+
+    Expects a .csv file of the entire 'General Search' tab 
+    from the online subject database. 
 
     Author: Travis M. Moore
     Created: 1 Aug, 2022
     Last Edited: 18 Aug, 2022
  """
 
+###########
+# Imports #
+###########
 # Import data science packages
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-#import system packages
+# Import system packages
 import datetime
 
 # Import custom modules
-from constants import FieldTypes as FT
+from models.constants import FieldTypes as FT
 
 
+#########
+# BEGIN #
+#########
 class SubDB:
+    """ Class to hold database info and provide related 
+        functions (e.g., get air conduction thresholds)
+    """
     def __init__(self, db_source):
         """ Load in database records, calculate age 
         """
@@ -107,7 +119,7 @@ class SubDB:
 
     def filter(self, colname, operator, value):
         # Remove rows containing "-" (i.e., no data)
-        self.data = self.data[self.data[colname] != "-"]
+        #self.data = self.data[self.data[colname] != "-"]
         # Check data type of value
         if isinstance(value, int):
             self.data[colname] = self.data[colname].astype("int")
@@ -306,8 +318,9 @@ class SubDB:
                 elif (ac[side + '500'] > ac[side + '2000']):
                     recommendation_threshold = ac[side + '500'] + 10
             except TypeError:
-                print("Cannot determine recommendation threshold!")
-                return
+                raise TypeError
+                #print("Cannot determine recommendation threshold!")
+                #return
 
             # Step 2: choose matrix based on recommendation threshold
             if recommendation_threshold <= 65:

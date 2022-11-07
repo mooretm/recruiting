@@ -9,7 +9,7 @@ import audio_dict as a
 db = m.SubDB('new')
 
 # # Filter by bilateral hearing aid use
-# db.filter("Hearing AidUse", "==", "Binaural")
+db.filter("Hearing AidUse", "==", "Binaural")
 
 # # Filter by passed cognitive screener
 # db.filter("MoCA Total Score", ">=", 26) # 26 is lower cutoff for normal
@@ -28,6 +28,7 @@ db = m.SubDB('new')
 
 # # Filter by hearing thresholds
 # db.ac_thresh_filt(a.Jingjing)
+db.ac_thresh_filt(a.N3_max)
 
 # Write database to .csv
 #db.write()

@@ -7,6 +7,7 @@
 
 # Import GUI packages
 import tkinter as tk
+from tkinter import ttk
 
 # Import custom modules
 import models as m
@@ -48,19 +49,36 @@ class App(tk.Tk):
         }
 
         # Set up main window
+        self.notebook = ttk.Notebook(self)
+        self.notebook.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
+        self.frm_sort = ttk.Frame(self.notebook)
+        self.frm_browse = ttk.Frame(self.notebook)
+        self.frm_sort.grid(row=0, column=0, ipadx=10, ipady=10)
+        self.frm_browse.grid(row=0, column=0, ipadx=10, ipady=10)
+
+        self.notebook.add(self.frm_sort, text='Sort')
+        self.notebook.add(self.frm_browse, text='Browse')
+
         self.create_tree_widget()
         self.create_main_frame(self.model)
         self.center_window()
 
 
     def create_tree_widget(self):
-        self.sub_tree = v.SubjectTree(self, self.db)
+        #self.sub_tree = v.SubjectTree(self, self.db)
+        #self.sub_tree.grid(row=0, column=0, sticky='ns')
+        #self.sub_tree.bind('<<TreeviewSelect>>', self._item_selected)
+
+        self.sub_tree = v.SubjectTree(self.frm_browse, self.db)
         self.sub_tree.grid(row=0, column=0, sticky='ns')
         self.sub_tree.bind('<<TreeviewSelect>>', self._item_selected)
 
 
     def create_main_frame(self, model):
-        self.main_frame = v.MainFrame(self, model)
+        #self.main_frame = v.MainFrame(self, model)
+        #self.main_frame.grid(row=0, column=2)
+
+        self.main_frame = v.MainFrame(self.frm_browse, model)
         self.main_frame.grid(row=0, column=2)
 
 

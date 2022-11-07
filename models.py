@@ -296,19 +296,79 @@ class SubDB:
         sides = ['RightAC ', 'LeftAC ']
         coupling = {}
         vent_size = {}
+
         for side in sides:
+            # RIC matrix selection logic
+            # Step 1: determine recommendation threshold
             try:
-                if (ac[side + '250'] and ac[side + '500'] < 30) and (ac[side + '1000'] <= 60):
-                    coupling[side[:-3]] = 'Open Dome'
-                elif (ac[side + '250'] or ac[side + '500'] > 30) and (ac[side + '250'] or ac[side + '500'] <= 50) and (ac[side + '1000'] <= 60):
-                    coupling[side[:-3]] = 'Occluded Dome'
-                #elif (ac['RightAC 250'] or ac['RightAC 500'] < 50) or (ac[side + '1000'] > 60):
-                elif (ac[side + '250'] or ac[side + '500'] < 50) or (ac[side + '1000'] > 60):
+                if (ac[side + '2000'] >= ac[side + '500']):
+                    recommendation_threshold = ac[side + '2000']
+                elif (ac[side + '500'] > ac[side + '2000']):
+                    recommendation_threshold = ac[side + '500'] + 10
+            except TypeError:
+                print("Cannot determine recommendation threshold!")
+                return
+
+            # Step 2: choose matrix based on recommendation threshold
+            if recommendation_threshold <= 65:
+                matrix = 'M'
+                #receiver = 'stock'
+            elif (recommendation_threshold <= 75) and (recommendation_threshold > 65):
+                matrix = 'P'
+                #receiver = 'stock'
+            elif (recommendation_threshold <= 80) and (recommendation_threshold > 75):
+                matrix = 'P'
+                #receiver = 'custom cased'
+            elif recommendation_threshold > 80:
+                matrix = 'UP'
+                #reciever = 'custom cased'
+
+
+            print(matrix)
+            print(matrix in ['S', 'M', 'P'])
+            print(ac.items())
+
+
+
+            # RIC acoustic coupling logic
+            # This is partly based on the matrix recommendation from above
+            try:
+                # Open dome
+                if (ac[side + '250'] and ac[side + '500'] < 30) \
+                    and (ac[side + '1000'] <= 60) \
+                    and (matrix in ['S', 'M', 'P']):
+                        coupling[side[:-3]] = 'Open Dome'
+
+                # Occluded dome
+                elif (ac[side + '250'] or ac[side + '500'] > 30) \
+                    and (ac[side + '250'] and ac[side + '500'] <= 50) \
+                    and (ac[side + '1000'] <= 60) \
+                    and (matrix in ['S', 'M', 'P']):
+                        coupling[side[:-3]] = 'Occluded Dome'
+
+                # Earmolds
+                # Dome unless...
+                elif (ac[side + '250'] or ac[side + '500'] > 50):
                     coupling[side[:-3]] = 'Earmold'
+
+                # Earmold
+                elif (ac[side + '1000'] > 60):
+                    coupling[side[:-3]] = 'Earmold'
+
+                # Earmold
+                elif matrix == 'UP':
+                    coupling[side[:-3]] = 'Earmold'
+
+                # Cannot categorize
+                else:
+                    coupling[side[:-3]] = 'Error!'
+
             except TypeError:
                 coupling[side[:-3]] = '-'
 
-            # Vent size
+
+
+            # RIC (and custom) vent size
             if coupling[side[:-3]] == 'Earmold':
                 # Get average threshold at 500 and 1000 Hz
                 avg500_1k = np.mean([ac[side + '500'], ac[side + '1000']])

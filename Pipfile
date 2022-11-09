@@ -8,6 +8,7 @@ numpy = "*"
 matplotlib = "*"
 pandas = "*"
 scipy = "*"
+markdown = "*"
 
 [dev-packages]
 

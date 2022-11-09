@@ -4,8 +4,8 @@
     database, and (2) browsing filtered subject records. 
 
     Written by: Travis M. Moore
-    Created: 26 Jul, 2022
-    Last edited: 7 Nov, 2022
+    Created: Jul 26, 2022
+    Last edited: Nov 9, 2022
 """
 
 ###########
@@ -16,13 +16,22 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
+# Import system packages
+import os
+import sys
+
+# Import misc packages
+import webbrowser
+import markdown
+
 # Import custom modules
 from models import dbmodel
 from models import constants as c
 from models import audio_dict
+from views import treeview as tv
 from views import filterview as fv
 from views import browseview as bv
-from views import treeview as tv
+from menus import mainmenu as menu_main
 from models.constants import FieldTypes as FT
 
 
@@ -51,10 +60,15 @@ class App(tk.Tk):
         """ Initialize main window and add views
         """
 
-        # Initialize main window
+        # Main window setup
         self.title('Subject Browser')
-        self.resizable(0,0)
+        self.resizable(1,1)
+        for ii in range(0,5):
+            self.columnconfigure(index=ii, weight=1)
 
+        ######################################
+        # Initialize Models, Menus and Views #
+        ######################################
         # Load in database
         self.db = dbmodel.SubDB("new")
 
@@ -70,14 +84,62 @@ class App(tk.Tk):
         # Notebook has two tabs: Filter, and Browse
         self.notebook = ttk.Notebook(self)
         self.notebook.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
+
         # Create tab frames
         self.frm_filter = ttk.Frame(self.notebook)
         self.frm_browse = ttk.Frame(self.notebook)
         self.frm_filter.grid(row=0, column=0, ipadx=10, ipady=10)
         self.frm_browse.grid(row=0, column=0, ipadx=10, ipady=10)
+        
         # Add tab frames to notebook
         self.notebook.add(self.frm_filter, text='Filter')
         self.notebook.add(self.frm_browse, text='Browse')
+
+
+        for ii in range(0,4):
+            self.notebook.columnconfigure(index=ii, weight=1)
+            self.frm_browse.columnconfigure(index=ii, weight=1)
+
+        for ii in range(1,4):
+            self.frm_filter.columnconfigure(index=ii, weight=1)
+
+
+
+        # Load menus
+        menu = menu_main.MainMenu(self)
+        self.config(menu=menu)
+
+        # Create callback dictionary
+        event_callbacks = {
+            # File menu
+            '<<FileSession>>': lambda _: self._show_session_dialog(),
+            '<<FileQuit>>': lambda _: self._quit(),
+
+            # Tools menu
+            '<<ToolsAudioSettings>>': lambda _: self._show_audio_dialog(),
+            '<<ToolsCalibration>>': lambda _: self._show_calibration_dialog(),
+
+            # Help menu
+            '<<Help>>': lambda _: self._show_help(),
+
+            # Session dialog commands
+            '<<SessionSubmit>>': lambda _: self._save_sessionpars(),
+
+            # Calibration dialog commands
+            '<<PlayCalStim>>': lambda _: self._play_calibration(),
+            '<<CalibrationSubmit>>': lambda _: self._calc_level(),
+
+            # Audio dialog commands
+            '<<AudioDialogSubmit>>': lambda _: self._save_sessionpars(),
+
+            # Mainframe commands
+            '<<SaveRecord>>': lambda _: self._on_save()
+        }
+
+        # Bind callbacks to sequences
+        for sequence, callback in event_callbacks.items():
+            self.bind(sequence, callback)
+
 
         # Add views to main window
         self.create_filter_frame(self.db, self.dbmodel)
@@ -86,14 +148,81 @@ class App(tk.Tk):
         self.center_window()
 
 
-    #############
-    # Functions #
-    #############
+    #####################
+    # General Functions #
+    #####################
+    def center_window(toplevel):
+        """ Center the root window 
+        """
+        toplevel.update_idletasks()
+        screen_width = toplevel.winfo_screenwidth()
+        screen_height = toplevel.winfo_screenheight()
+        size = tuple(int(_) for _ in toplevel.geometry().split('+')[0].split('x'))
+        x = screen_width/2 - size[0]/2
+        y = screen_height/2 - size[1]/2
+        toplevel.geometry("+%d+%d" % (x, y)) 
+
+    
+    def resource_path(self, relative_path):
+        """ Get the absolute path to compiled resources
+        """
+        try:
+            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+
+        return os.path.join(base_path, relative_path)
+
+
+    def _quit(self):
+        """ Exit the application
+        """
+        self.destroy()
+
+
+    #######################
+    # Help menu functions #
+    #######################
+    def _show_help(self):
+        """ Create html help file and display 
+            in default browser
+        """
+        ################################
+        # Uncomment for script version #
+        ################################
+        # Read markdown file and convert to html
+        with open('README.md', 'r') as f:
+            text = f.read()
+            html = markdown.markdown(text)
+
+        # Create html file for display
+        with open('.\\assets\\README\\README.html', 'w') as f:
+            f.write(html)
+
+        # Open README in default web browser
+        webbrowser.open('.\\assets\\README\\README.html')
+
+        ##################################
+        # Uncomment for compiled version #
+        ##################################
+        # help_file = self.resource_path('README\\README.html')
+        # webbrowser.open(help_file)
+
+
+    ##########################
+    # Filter Frame Functions #
+    ##########################
     def create_filter_frame(self, db, dbmodel):
+        """ Create filter view to load into notebook 'Filter' tab
+        """
         self.filter_frame = fv.FilterFrame(self.frm_filter, db, dbmodel)
         self.filter_frame.grid(row=0, column=0)
 
 
+    ##########################
+    # Browse Frame Functions #
+    ##########################
     def create_tree_widget(self):
         """ Create tree widget populated with subject IDs
         """
@@ -107,18 +236,6 @@ class App(tk.Tk):
         """
         self.browse_frame = bv.BrowseFrame(self.frm_browse, dbmodel)
         self.browse_frame.grid(row=0, column=2)
-
-
-    def center_window(toplevel):
-        """ Center the root window 
-        """
-        toplevel.update_idletasks()
-        screen_width = toplevel.winfo_screenwidth()
-        screen_height = toplevel.winfo_screenheight()
-        size = tuple(int(_) for _ in toplevel.geometry().split('+')[0].split('x'))
-        x = screen_width/2 - size[0]/2
-        y = screen_height/2 - size[1]/2
-        toplevel.geometry("+%d+%d" % (x, y)) 
 
 
     def _item_selected(self, *_):

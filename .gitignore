@@ -3,3 +3,4 @@ __init__.py
 *.xlsx
 etc/
 junk/
+output/

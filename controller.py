@@ -76,8 +76,17 @@ class App(tk.Tk):
         self.filtermodel = filtermodel.FilterList()
 
         # Load in sample database at start
-        self.db = dbmodel.SubDB(".\\assets\\sample_data.csv")
-
+        # If running from compiled, look in compiled temporary location
+        print('Looking for startup database in temporary location')
+        db_path = self.resource_path('sample_data.csv')
+        file_exists = os.access(db_path, os.F_OK)
+        if not file_exists:
+            print('Not found!')
+            print('Checking local script version location for database')
+            self.db = dbmodel.SubDB(".\\assets\\sample_data.csv")
+        else:
+            self.db = dbmodel.SubDB(db_path)
+            
         # Load in dict fields for displaying records
         self.dbmodel = dbmodel.DataModel()
         fields = self.dbmodel.fields
@@ -270,26 +279,26 @@ class App(tk.Tk):
     def _show_help(self):
         """ Create html help file and display in default browser
         """
-        ################################
-        # Uncomment for script version #
-        ################################
-        # Read markdown file and convert to html
-        with open('README.md', 'r') as f:
-            text = f.read()
-            html = markdown.markdown(text)
+        print('Looking for help file in compiled version temp location...')
+        help_file = self.resource_path('README\\README.html')
+        file_exists = os.access(help_file, os.F_OK)
+        if not file_exists:
+            print('Not found!\nChecking for help file in ' +
+                'local script version location')
+            # Read markdown file and convert to html
+            with open('README.md', 'r') as f:
+                text = f.read()
+                html = markdown.markdown(text)
 
-        # Create html file for display
-        with open('.\\assets\\README\\README.html', 'w') as f:
-            f.write(html)
+            # Create html file for display
+            with open('.\\assets\\README\\README.html', 'w') as f:
+                f.write(html)
 
-        # Open README in default web browser
-        webbrowser.open('.\\assets\\README\\README.html')
-
-        ##################################
-        # Uncomment for compiled version #
-        ##################################
-        # help_file = self.resource_path('README\\README.html')
-        # webbrowser.open(help_file)
+            # Open README in default web browser
+            webbrowser.open('.\\assets\\README\\README.html')
+        else:
+            help_file = self.resource_path('README\\README.html')
+            webbrowser.open(help_file)
 
 
     ##########################

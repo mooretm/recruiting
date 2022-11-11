@@ -90,7 +90,7 @@ class MainMenu(tk.Menu):
             'Written by: Travis M. Moore\n'
             'Version 1.0.0\n'
             'Created: Jul 26, 2022\n'
-            'Last Edited: Nov 10, 2022'
+            'Last Edited: Nov 11, 2022'
         )
         messagebox.showinfo(
             title='About',

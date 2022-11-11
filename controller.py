@@ -5,7 +5,7 @@
 
     Written by: Travis M. Moore
     Created: Jul 26, 2022
-    Last edited: Nov 9, 2022
+    Last edited: Nov 11, 2022
 """
 
 ###########
@@ -128,12 +128,6 @@ class App(tk.Tk):
 
             # Filter view
             '<<Filter>>': lambda _: self._on_filter(),
-
-            # Session dialog commands
-            '<<SessionSubmit>>': lambda _: self._save_sessionpars(),
-
-            # Mainframe commands
-            '<<SaveRecord>>': lambda _: self._on_save()
         }
 
         # Bind callbacks to sequences
@@ -141,7 +135,9 @@ class App(tk.Tk):
             self.bind(sequence, callback)
 
 
-        # Add views to main window
+        ############################
+        # Add Views To Main Window #
+        ############################
         self.create_filter_frame(self.db, self.filter_dict)
         self.create_tree_widget()
         self.create_browse_frame(self.db, self.dbmodel)
@@ -175,12 +171,6 @@ class App(tk.Tk):
 
         return os.path.join(base_path, relative_path)
 
-
-    def _update_filter_dict(self):
-        self.filter_dict = self.filter_frame._get_filter_dict()
-        self._filter(self.filter_dict)
-
-        # Have to get updated values from filterview.py somehow...
 
     #######################
     # File Menu Functions #
@@ -224,12 +214,19 @@ class App(tk.Tk):
 
 
     def _import_filter_list(self):
-        self.filter_dict = self.filtermodel.mk_filter_dict()
+        """ Read external filter values list and update filterview
+            comboboxes with values
+        """
+        # Get updated filter values dict
+        self.filter_dict = self.filtermodel.import_filter_dict()
+        # Update filterview comboboxes
         self.filter_frame._load_filters(self.filter_dict)
 
 
     def _export_filter_list(self):
-        self.filtermodel.export_filters()
+        """ Write filterview combobox values to .csv file
+        """
+        self.filtermodel.export_filters(self.filter_frame.filter_dict)
 
 
     def _quit(self):
@@ -251,7 +248,8 @@ class App(tk.Tk):
         scrub_dict = {
             1: ("Status", "contains", ["-", "Active"]),
             2: ("Good Candidate", "does not equal", "Poor"),
-            3: ("Employment Status", "does not equal", "Employee")
+            3: ("Employment Status", "does not equal", "Employee"),
+            4: ("Miles From Starkey", "<=", "60")
         }
         # Call filtering function
         self._filter(scrub_dict)
@@ -305,14 +303,28 @@ class App(tk.Tk):
 
 
     def _on_filter(self):
+        """ Called from filterview 'Filter Records' button event. 
+            Update filter dict and pass to filter func.
+        """
+        # Update local filter dict with values from filterview
         self.filter_dict = self.filter_frame.filter_dict
+        # Call filter func using updated filter dict
         self._filter(self.filter_dict)
 
 
     def _filter(self, filter_val_dict):
+        """ Call filter method of dbmodel to subset database.
+            Update tree widget after filtering. 
+        """
+        if not filter_val_dict:
+            messagebox.showwarning(title="No Filters Found",
+                message="No filters have been set!")
+            return
+
         # Clear any previous output from textbox
         self.filter_frame.txt_output.delete('1.0', tk.END)
 
+        # Remind user what the previous record count was
         self.filter_frame.txt_output.insert(tk.END,
             f"Candidates before filtering: {str(self.db.data.shape[0])}\n\n")
 
@@ -410,7 +422,8 @@ class App(tk.Tk):
             
 
     def _show_audio(self, record):
-        """ Retrieve figure axis handle and plot audio """
+        """ Retrieve figure axis handle and plot audio 
+        """
         ax1 = self.browse_frame.plot_audio()
         self.db.audio_ac(record, ax1)
 

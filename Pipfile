@@ -9,6 +9,7 @@ matplotlib = "*"
 pandas = "*"
 scipy = "*"
 markdown = "*"
+auto-py-to-exe = "*"
 
 [dev-packages]
 

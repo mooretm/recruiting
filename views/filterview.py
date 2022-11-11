@@ -1,4 +1,4 @@
-""" Subject filter options view for Subject Browser 
+""" Filtering window for Subject Browser 
 """
 
 ###########
@@ -11,9 +11,6 @@ from tkinter import messagebox
 
 # Import misc packages
 import uuid
-
-# Import custom modules
-from models.constants import FieldTypes as FT
 
 
 #########
@@ -29,6 +26,7 @@ class FilterFrame(ttk.Frame):
         ##############
         # Initialize #
         ##############
+        # Assign constructor arguments to class variables
         self.filter_dict = filter_dict
         self.db = database
 
@@ -40,6 +38,10 @@ class FilterFrame(ttk.Frame):
         self.operators = ["equals", "does not equal", "contains", ">", ">=", 
             "<", "<="]
 
+
+        #################
+        # Create Frames #
+        #################
         # Allow expansion of main frame
         self.columnconfigure(index=0, weight=1)
         
@@ -47,6 +49,7 @@ class FilterFrame(ttk.Frame):
         style = ttk.Style()
         style.configure("rec.TLabel", foreground='green')
 
+        # Frame options
         options = {'padx':10, 'pady':10}
 
         # Create frames
@@ -57,7 +60,10 @@ class FilterFrame(ttk.Frame):
         frm_filter.columnconfigure(index=2, weight=1)
         frm_filter.columnconfigure(index=3, weight=1)
 
-        # Create column headings
+
+        ############
+        # Controls #
+        ############
         label_text = ['Attribute', 'Operator', 'Value']
         for idx, label in enumerate(label_text, start=1):
             ttk.Label(frm_filter, text=label).grid(
@@ -81,10 +87,10 @@ class FilterFrame(ttk.Frame):
 
 
         ###############################
-        # Create filtering comboboxes #
+        # Create Filtering Comboboxes #
         ###############################
         # Specify number of rows
-        num_fields = 8
+        num_fields = 10
 
         # Attribute combobox
         self.attrib_vars = []
@@ -136,7 +142,7 @@ class FilterFrame(ttk.Frame):
             # Create combobox with above variable
             cb_value = ttk.Combobox(frm_filter, 
                 textvariable=self.value_vars[ii],
-                postcommand=self.populate_values, takefocus=0)
+                postcommand=self.get_values, takefocus=0)
             # Show combobox
             cb_value.grid(row=6+ii, column=3, pady=(0,10), padx=10,
                 sticky='ew')
@@ -144,29 +150,36 @@ class FilterFrame(ttk.Frame):
             self.value_cbs.append(cb_value)
 
 
-    def populate_values(self, *_):
+    #############
+    # Functions #
+    #############
+    def get_values(self, *_):
+        """ Get values to populate value comboboxes based on the selected 
+            attribute in the attribute comboboxes
+        """
         for ii in range(0, len(self.attrib_cbs)):
             if self.attrib_cbs[ii].get():
-                print(f"attribute found in {ii}")
-                print(self.attrib_cbs[ii].get())
-                temp = list(self.db.data[self.attrib_cbs[ii].get()].unique())
-                temp.sort()
+                unique_vals = list(self.db.data[self.attrib_cbs[ii].get()].unique())
+                unique_vals.sort()
                 try:
-                    temp.remove('-')
+                    unique_vals.remove('-')
                 except ValueError:
                     print("View_Filter_144: No '-' found in value list.")
-                self.value_cbs[ii]['values'] = temp
-                #self.value_cbs[ii].set('')
+                self.value_cbs[ii]['values'] = unique_vals
 
 
     def _do_filter(self):
+        """ Update filter dict based on provided combobox values.
+            Send filter event to controller.
+        """
+        # Get values from all comboboxes
         self._get_filter_vals()
         # Send event to controller to filter
         self.event_generate('<<Filter>>')
 
 
     def _get_filter_vals(self):
-        """ Create a dictionary of filter values. 
+        """ Create a dictionary of filter values from combobox values. 
             Check for missing values and skipped rows.
         """
         all_data = []
@@ -221,26 +234,27 @@ class FilterFrame(ttk.Frame):
                     )
                     return
 
-        # Send event to controller to filter
-        #self.event_generate('<<Filter>>')
-
 
     def _clear_filters(self):
-        """ Clear all values from the filter comboboxes
+        """ Clear all values from the filter comboboxes.
+            Reset filter dict to empty.
         """
+        # Clear out current filter dict
         self.filter_dict = {}
+        # Delete any output from textbox
         self.txt_output.delete('1.0', tk.END)
-
+        # Clear all combobox values
         for ii in range(0, len(self.attrib_cbs)):
             self.attrib_cbs[ii].set('')
             self.op_cbs[ii].set('')
             self.value_cbs[ii].set('')
-
         # Set the focus to the upper left combobox
         self.attrib_cbs[0].focus_set()
 
 
     def _load_filters(self, filter_dict):
+        """ Populate comboboxes with values from provided dict
+        """
         # Clear any textbox output
         self.txt_output.delete('1.0', tk.END)
 
@@ -249,7 +263,3 @@ class FilterFrame(ttk.Frame):
             self.attrib_cbs[int(ii)].set(filter_dict[ii][0])
             self.op_cbs[int(ii)].set(filter_dict[ii][1])
             self.value_cbs[int(ii)].set(filter_dict[ii][2])
-
-        # Update filter dictionary with new values
-        # Just update filter_dict with get_vals func
-        #self.filter_dict = filter_dict

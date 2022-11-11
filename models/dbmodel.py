@@ -187,6 +187,7 @@ class SubDB:
             self.data[colname] = self.data[colname].astype("float")
 
         # Perform filtering
+        # NOTE: Add OR condition to include '-' values for every operator!
         if operator == "equals":
             self.data = self.data[self.data[colname] == value]
         if operator == "does not equal":

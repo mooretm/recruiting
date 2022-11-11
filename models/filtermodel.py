@@ -30,7 +30,7 @@ class FilterList:
     #    pass
 
 
-    def mk_filter_dict(self):
+    def import_filter_dict(self):
         # Query user for filter .csv file
         filename = filedialog.askopenfilename()
         # Do nothing if cancelled
@@ -57,10 +57,10 @@ class FilterList:
         return filter_dict
 
 
-    def export_filters(self):
+    def export_filters(self, filter_dict):
         """ Save filters to .csv
         """
-        if not self.filter_dict:
+        if not filter_dict:
             messagebox.showerror(title="Empty List",
                 message="No filter values to save!",
                 detail="Cannot export an empty filter list. If you have " +
@@ -70,7 +70,7 @@ class FilterList:
             return
 
         # Convert dict to dataframe for writing to .csv
-        filter_df = pd.DataFrame.from_dict(self.filter_dict)
+        filter_df = pd.DataFrame.from_dict(filter_dict)
 
         # Generate date stamp
         now = datetime.now()

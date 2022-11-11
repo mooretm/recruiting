@@ -20,12 +20,32 @@ class MainMenu(tk.Menu):
     def __init__(self, parent, **kwargs):
         super().__init__(parent, **kwargs)
 
-        # File menu
+        #############
+        # File Menu #
+        #############
         file_menu = tk.Menu(self, tearoff=False)
         file_menu.add_command(
-            label="Session...",
-            command=self._event('<<FileSession>>')
+            label="Import Full DB...",
+            command=self._event('<<FileImportFullDB>>')
         )
+        file_menu.add_command(
+            label="Import Filtered DB...",
+            command=self._event('<<FileImportFilteredDB>>')
+        )
+        file_menu.add_command(
+            label="Export DB...",
+            command=self._event('<<FileExportDB>>')
+        )
+        file_menu.add_separator()
+        file_menu.add_command(
+            label="Import Filter List...",
+            command=self._event('<<FileImportList>>')
+        )
+        file_menu.add_command(
+            label="Export Filter List...",
+            command=self._event('<<FileExportList>>')
+        )
+
         file_menu.add_separator()
         file_menu.add_command(
             label="Quit",
@@ -33,20 +53,20 @@ class MainMenu(tk.Menu):
         )
         self.add_cascade(label='File', menu=file_menu)
 
-        # Tools menu
+        ##############
+        # Tools Menu #
+        ##############
         tools_menu = tk.Menu(self, tearoff=False)
         tools_menu.add_command(
-            label='Audio Settings...',
-            command=self._event('<<ToolsAudioSettings>>')
-        )
-        tools_menu.add_command(
-            label='Calibration...',
-            command=self._event('<<ToolsCalibration>>')
+            label='Reset Filters',
+            command=self._event('<<ToolsReset>>')
         )
         # Add Tools menu to the menubar
         self.add_cascade(label="Tools", menu=tools_menu)
 
-        # Help menu
+        #############
+        # Help Menu #
+        #############
         help_menu = tk.Menu(self, tearoff=False)
         help_menu.add_command(
             label='About',
@@ -60,14 +80,17 @@ class MainMenu(tk.Menu):
         self.add_cascade(label="Help", menu=help_menu)
 
 
+    #############
+    # Functions #
+    #############
     def show_about(self):
         """ Show the about dialog """
         about_message = 'Subject Browser'
         about_detail = (
             'Written by: Travis M. Moore\n'
-            'Version 0.0.0\n'
+            'Version 1.0.0\n'
             'Created: Jul 26, 2022\n'
-            'Last Edited: Nov 09, 2022'
+            'Last Edited: Nov 10, 2022'
         )
         messagebox.showinfo(
             title='About',

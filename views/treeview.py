@@ -16,7 +16,12 @@ class SubjectTree(tk.Frame):
         self.db = db
         self.rowconfigure(0, weight=1)
 
-        # Tree
+        self._load_tree()
+
+
+    def _load_tree(self):
+        """ Create tree widget from database
+        """
         # Get subs from dataframe
         subjects = self.db.data['Subject Id']
         columns = ('subject_id')

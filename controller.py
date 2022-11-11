@@ -15,6 +15,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
+from tkinter import filedialog
 
 # Import system packages
 import os
@@ -26,7 +27,7 @@ import markdown
 
 # Import custom modules
 from models import dbmodel
-from models import constants as c
+from models import filtermodel
 from models import audio_dict
 from views import treeview as tv
 from views import filterview as fv
@@ -60,17 +61,22 @@ class App(tk.Tk):
         """ Initialize main window and add views
         """
 
-        # Main window setup
-        self.title('Subject Browser')
-        self.resizable(1,1)
-        for ii in range(0,5):
-            self.columnconfigure(index=ii, weight=1)
-
         ######################################
         # Initialize Models, Menus and Views #
         ######################################
-        # Load in database
-        self.db = dbmodel.SubDB("new")
+        # Main window setup
+        self.title('Subject Browser')
+        self.resizable(1,1)
+        self.columnconfigure(index=0, weight=1)
+
+        # Create filter settings dict
+        self.filter_dict = {}
+
+        # Create filter model
+        self.filtermodel = filtermodel.FilterList()
+
+        # Load in sample database at start
+        self.db = dbmodel.SubDB(".\\assets\\sample_data.csv")
 
         # Load in dict fields for displaying records
         self.dbmodel = dbmodel.DataModel()
@@ -82,55 +88,49 @@ class App(tk.Tk):
 
         # Create notebook widget #
         # Notebook has two tabs: Filter, and Browse
-        self.notebook = ttk.Notebook(self)
+        self.notebook = ttk.Notebook(self, takefocus=0)
         self.notebook.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
 
         # Create tab frames
         self.frm_filter = ttk.Frame(self.notebook)
         self.frm_browse = ttk.Frame(self.notebook)
-        self.frm_filter.grid(row=0, column=0, ipadx=10, ipady=10)
+        self.frm_filter.grid(row=0, column=0, ipadx=10, ipady=10, sticky='ew')
+        self.frm_filter.columnconfigure(index=0, weight=1)
         self.frm_browse.grid(row=0, column=0, ipadx=10, ipady=10)
-        
+        self.frm_browse.columnconfigure(index=0, weight=1)
+
         # Add tab frames to notebook
         self.notebook.add(self.frm_filter, text='Filter')
         self.notebook.add(self.frm_browse, text='Browse')
-
-
-        for ii in range(0,4):
-            self.notebook.columnconfigure(index=ii, weight=1)
-            self.frm_browse.columnconfigure(index=ii, weight=1)
-
-        for ii in range(1,4):
-            self.frm_filter.columnconfigure(index=ii, weight=1)
-
-
 
         # Load menus
         menu = menu_main.MainMenu(self)
         self.config(menu=menu)
 
-        # Create callback dictionary
+
+        ##############################
+        # Create callback dictionary #
+        ##############################
         event_callbacks = {
             # File menu
-            '<<FileSession>>': lambda _: self._show_session_dialog(),
+            '<<FileImportFullDB>>': lambda _: self._import_full(),
+            '<<FileImportFilteredDB>>': lambda _: self._import_filtered(),
+            '<<FileExportDB>>': lambda _: self._export_db(),
+            '<<FileImportList>>': lambda _: self._import_filter_list(),
+            '<<FileExportList>>': lambda _: self._export_filter_list(),
             '<<FileQuit>>': lambda _: self._quit(),
 
             # Tools menu
-            '<<ToolsAudioSettings>>': lambda _: self._show_audio_dialog(),
-            '<<ToolsCalibration>>': lambda _: self._show_calibration_dialog(),
+            '<<ToolsReset>>': lambda _: self._reset_filters(),
 
             # Help menu
             '<<Help>>': lambda _: self._show_help(),
 
+            # Filter view
+            '<<Filter>>': lambda _: self._on_filter(),
+
             # Session dialog commands
             '<<SessionSubmit>>': lambda _: self._save_sessionpars(),
-
-            # Calibration dialog commands
-            '<<PlayCalStim>>': lambda _: self._play_calibration(),
-            '<<CalibrationSubmit>>': lambda _: self._calc_level(),
-
-            # Audio dialog commands
-            '<<AudioDialogSubmit>>': lambda _: self._save_sessionpars(),
 
             # Mainframe commands
             '<<SaveRecord>>': lambda _: self._on_save()
@@ -142,9 +142,9 @@ class App(tk.Tk):
 
 
         # Add views to main window
-        self.create_filter_frame(self.db, self.dbmodel)
+        self.create_filter_frame(self.db, self.filter_dict)
         self.create_tree_widget()
-        self.create_browse_frame(self.dbmodel)
+        self.create_browse_frame(self.db, self.dbmodel)
         self.center_window()
 
 
@@ -167,12 +167,69 @@ class App(tk.Tk):
         """ Get the absolute path to compiled resources
         """
         try:
-            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            # PyInstaller creates a temp folder and 
+            # stores path in _MEIPASS
             base_path = sys._MEIPASS
         except Exception:
             base_path = os.path.abspath(".")
 
         return os.path.join(base_path, relative_path)
+
+
+    def _update_filter_dict(self):
+        self.filter_dict = self.filter_frame._get_filter_dict()
+        self._filter(self.filter_dict)
+
+        # Have to get updated values from filterview.py somehow...
+
+    #######################
+    # File Menu Functions #
+    #######################
+    def _import_full(self):
+        """ Load FULL database .csv file (i.e., not previously
+            imported)
+        """
+        # Query user for database .csv file
+        filename = filedialog.askopenfilename()
+        # Do nothing if cancelled
+        if not filename:
+            return
+        # If a valid filename is found, load it
+        self.db.load_db(filename)
+        # Remove junk records
+        self._initial_scrub()
+        # Reload the treeview with imported database
+        self.sub_tree._load_tree()
+
+
+    def _import_filtered(self):
+        """ Load previously-imported database .csv file
+            (i.e., an file exported from this app)
+        """
+        # Query user for database .csv file
+        filename = filedialog.askopenfilename()
+        # Do nothing if cancelled
+        if not filename:
+            return
+        # If a valid filename is found, load it
+        self.db.load_filtered_db(filename)
+        # Reload the treeview with imported database
+        self.sub_tree._load_tree()
+
+
+    def _export_db(self):
+        """ Write current database object to .csv file
+        """
+        self.db.write()
+
+
+    def _import_filter_list(self):
+        self.filter_dict = self.filtermodel.mk_filter_dict()
+        self.filter_frame._load_filters(self.filter_dict)
+
+
+    def _export_filter_list(self):
+        self.filtermodel.export_filters()
 
 
     def _quit(self):
@@ -181,12 +238,39 @@ class App(tk.Tk):
         self.destroy()
 
 
+    def _initial_scrub(self):
+        """ Perform perfunctory junk record removal
+        """
+        # Clear any previous output from textbox
+        self.filter_frame.txt_output.delete('1.0', tk.END)
+        # Provide feedback
+        self.filter_frame.txt_output.insert(tk.END, 
+                f"Loaded database records\n" +
+                f"Remaining Candidates: {str(self.db.data.shape[0])}\n\n")
+        # Create dictionary of filtering values
+        scrub_dict = {
+            1: ("Status", "contains", ["-", "Active"]),
+            2: ("Good Candidate", "does not equal", "Poor"),
+            3: ("Employment Status", "does not equal", "Employee")
+        }
+        # Call filtering function
+        self._filter(scrub_dict)
+        # Update tree widget after filtering
+        self.sub_tree._load_tree()
+
+
+    ########################
+    # Tools Menu Functions #
+    ########################
+    def _reset_filters(self):
+        self.filter_frame._clear_filters()
+
+
     #######################
-    # Help menu functions #
+    # Help Menu Functions #
     #######################
     def _show_help(self):
-        """ Create html help file and display 
-            in default browser
+        """ Create html help file and display in default browser
         """
         ################################
         # Uncomment for script version #
@@ -213,11 +297,47 @@ class App(tk.Tk):
     ##########################
     # Filter Frame Functions #
     ##########################
-    def create_filter_frame(self, db, dbmodel):
+    def create_filter_frame(self, db, filter_dict):
         """ Create filter view to load into notebook 'Filter' tab
         """
-        self.filter_frame = fv.FilterFrame(self.frm_filter, db, dbmodel)
-        self.filter_frame.grid(row=0, column=0)
+        self.filter_frame = fv.FilterFrame(self.frm_filter, db, filter_dict)
+        self.filter_frame.grid(row=0, column=0, sticky='ew')
+
+
+    def _on_filter(self):
+        self.filter_dict = self.filter_frame.filter_dict
+        self._filter(self.filter_dict)
+
+
+    def _filter(self, filter_val_dict):
+        # Clear any previous output from textbox
+        self.filter_frame.txt_output.delete('1.0', tk.END)
+
+        self.filter_frame.txt_output.insert(tk.END,
+            f"Candidates before filtering: {str(self.db.data.shape[0])}\n\n")
+
+        try:
+            for val in filter_val_dict:
+                self.db.filter(
+                    filter_val_dict[val][0],
+                    filter_val_dict[val][1],
+                    filter_val_dict[val][2]
+                )
+                self.filter_frame.txt_output.insert(tk.END, 
+                    f"Filtering by: {filter_val_dict[val][0]} " +
+                    f"{filter_val_dict[val][1]} {filter_val_dict[val][2]}...\n" +
+                    f"Remaining Candidates: {str(self.db.data.shape[0])}\n\n")
+        except TypeError:
+            messagebox.showerror(title="Filtering Error",
+                message="Cannot compare different data types!",
+                detail="Filtering a previously-exported database file is " +
+                    "not currently fully supported. It is likely that " + 
+                    "the data type of some columns has been changed. Your " +
+                    "request cannot be processed.")
+            return
+
+        # Update tree widget after filtering
+        self.sub_tree._load_tree()
 
 
     ##########################
@@ -231,10 +351,10 @@ class App(tk.Tk):
         self.sub_tree.bind('<<TreeviewSelect>>', self._item_selected)
 
 
-    def create_browse_frame(self, dbmodel):
+    def create_browse_frame(self, database, dbmodel):
         """ Create browse view to load into notebook 'Browse' tab
         """
-        self.browse_frame = bv.BrowseFrame(self.frm_browse, dbmodel)
+        self.browse_frame = bv.BrowseFrame(self.frm_browse, database, dbmodel)
         self.browse_frame.grid(row=0, column=2)
 
 
@@ -270,7 +390,6 @@ class App(tk.Tk):
             self._vars['l_coupling'] = self.db.data[self.db.data['Subject Id'] == record]['Left Earmold Style'].values[0]
             self._vars['r_receiver'] = self.db.data[self.db.data['Subject Id'] == record]['Right Ric Cable Size'].values[0]
             self._vars['l_receiver'] = self.db.data[self.db.data['Subject Id'] == record]['Left Ric Cable Size'].values[0]
-
             try:
                 coupling, vent_size = self.db.coupling(record)
                 self._vars['r_rec_coupling'] = coupling['Right']

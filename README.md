@@ -207,6 +207,6 @@ The data .csv file stores the following information on each trial:
 ---
 
 ## Contact
-Please use the contact information below to submit bug reports, feature requests and any other feedback. Thank you for using the Speech Task Controller!
+Please use the contact information below to submit bug reports, feature requests and any other feedback. Thank you for using the Subject Browser!
 
 - Travis M. Moore: travis_moore@starkey.com

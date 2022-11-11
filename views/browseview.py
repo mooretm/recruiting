@@ -37,8 +37,10 @@ class BrowseFrame(ttk.Frame):
     }
 
 
-    def __init__(self, parent, dbmodel, *args, **kwargs):
+    def __init__(self, parent, database, dbmodel, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
+
+        self.db = database
 
         self.dbmodel = dbmodel
         fields = self.dbmodel.fields

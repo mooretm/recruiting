@@ -5,19 +5,22 @@
 
     Author: Travis M. Moore
     Created: 1 Aug, 2022
-    Last Edited: 18 Aug, 2022
+    Last Edited: Nov 09, 2022
  """
 
 ###########
 # Imports #
 ###########
+# Import GUI packages
+from tkinter import filedialog
+
 # Import data science packages
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
 # Import system packages
-import datetime
+from datetime import datetime
 
 # Import custom modules
 from models.constants import FieldTypes as FT
@@ -30,64 +33,90 @@ class SubDB:
     """ Class to hold database info and provide related 
         functions (e.g., get air conduction thresholds)
     """
-    def __init__(self, db_source):
-        """ Load in database records, calculate age 
+
+    def __init__(self, db_path):
+        """ Load database .csv file from path
         """
-        # New query or use existing file?
-        if db_source == 'new':
-            # Import .csv file of database records
-            general_search = pd.read_csv("C:\\Users\\MooTra\\Downloads\\general_search_2.0.csv")
+        self.load_db(db_path)
 
-            # Truncate to columns of interest
-            cols_general = [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 
-                            17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 
-                            31, 32, 33, 34, 35, 36, 38, 40, 42, 49, 51, 52, 74, 85, 
-                            86, 88, 90, 101,102,103,104, 109, 112, 113, 116, 121, 
-                            123, 124, 131, 132, 133, 134, 151, 
-                            154, 155, 158, 163, 164, 165, 166, 170, 172, 173, 176, 
-                            177, 178, 179, 180, 185, 187, 189, 192, 196, 202, 204]
 
-            # New dataframe with columns of interest only
-            general_search = general_search[general_search.columns[cols_general]]
+    #####################
+    # General Functions #
+    #####################
+    def load_filtered_db(self, db_path):
+        # Import .csv file of database records
+        self.data = pd.read_csv(db_path)
 
-            short_gen = general_search
+        # Convert age back to string after importing 
+        # a previously-exported database .csv file
+        self.data['Age'] = self.data['Age'].astype("str")
 
-            # Correct column names
-            short_gen.rename(columns = {
-                'L Pt Bc 1000':'LeftBC 1000',
-                'L Pt Bc 2000':'LeftBC 2000',
-                'L Pt Bc 4000':'LeftBC 4000',
-                'L Pt Bc 500':'LeftBC 500',
-                'RightBC  1000':'RightBC 1000',
-                'RightBC  2000':'RightBC 2000',
-                'RightBC  4000':'RightBC 4000'
-                }, inplace = True
-            )
+        # Convert all values back to strings
+        #self.data = self.data.astype(str)
 
-            # Calculate age and store in new dataframe column
-            short_gen['Age'] = short_gen['Date Of Birth'].apply(lambda x: self.calc_age(x))
+        # Provide feedback
+        print("Loaded database records")
+        print(f"Remaining candidates: {self.data.shape[0]}\n")
 
-            # Sort dataframe by subject ID
-            self.data = short_gen.sort_values(by='Subject Id').reset_index(drop=True)
 
-            # Provide feedback
-            print("Loaded database records")
-            print(f"Remaining candidates: {self.data.shape[0]}\n")
+    def load_db(self, db_path):
+        """ Read database .csv provided from filedialog browser
+        """
+        # Import .csv file of database records
+        general_search = pd.read_csv(db_path)
 
-        elif db_source == 'old':
-            self.data = pd.read_csv("C:/Users/MooTra/Documents/Projects/EdgeMode/IRB/Recruiting/sub_db_free.csv")
-            print("Loaded database records")
-            print(f"Remaining candidates: {self.data.shape[0]}\n")
+        # Define columns of interest
+        cols_general = [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 
+                        16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 
+                        29, 30, 31, 32, 33, 34, 35, 36, 38, 40, 42, 49, 51, 
+                        52, 74, 85, 86, 88, 90, 101,102,103,104, 109, 112, 
+                        113, 116, 121, 123, 124, 131, 132, 133, 134, 151, 
+                        154, 155, 158, 163, 164, 165, 166, 170, 172, 173, 
+                        176, 177, 178, 179, 180, 185, 187, 189, 192, 196, 
+                        202, 204]
 
-        # Get rid of junk
-        self._initial_scrub()
+        # New dataframe with columns of interest only
+        short_gen = general_search[general_search.columns[cols_general]].copy()
+
+        # Correct column names
+        short_gen.rename(columns = {
+            'L Pt Bc 1000':'LeftBC 1000',
+            'L Pt Bc 2000':'LeftBC 2000',
+            'L Pt Bc 4000':'LeftBC 4000',
+            'L Pt Bc 500':'LeftBC 500',
+            'RightBC  1000':'RightBC 1000',
+            'RightBC  2000':'RightBC 2000',
+            'RightBC  4000':'RightBC 4000',
+            'Hearing AidUse':'Hearing Aid Use'
+            }, inplace = True
+        )
+
+        # Calculate age and store in new dataframe column
+        short_gen['Age'] = short_gen['Date Of Birth'].apply(
+            lambda x: self.calc_age(x))
+
+        # Convert Age column back to string
+        short_gen['Age'] = short_gen['Age'].astype("str")
+
+        # Sort dataframe by subject ID
+        self.data = short_gen.sort_values(by='Subject Id').reset_index(
+            drop=True)
+
+        # Provide feedback
+        print("Loaded database records")
+        print(f"Remaining candidates: {self.data.shape[0]}\n")
+
+        # Get rid of junk records
+        #self._initial_scrub()
 
 
     def calc_age(self, birthdate):
-        today = datetime.datetime.now()
+        """ Convert birthdate to ages
+        """
+        today = datetime.now()
         x = str(birthdate).split('/')
         try:
-            birth = datetime.datetime(int(x[2]), int(x[0]), int(x[1]))
+            birth = datetime(int(x[2]), int(x[0]), int(x[1]))
             age = int((today - birth).days / 365.2425)
         except TypeError:
             age = '-'
@@ -98,25 +127,56 @@ class SubDB:
         return age
 
 
-    def write(self):
-        """ Save database to .csv"""
-        # Write database to desktop
-        self.data.to_csv(
-            "C:\\Users\\MooTra\\OneDrive - Starkey\\Desktop\\sub_db.csv",
-            mode='w',
-            index=False)
-        print("Database written to file!")
-
-
     def _initial_scrub(self):
-        """ Perform perfunctory filtering """
+        """ Perform perfunctory filtering 
+        """
+        # Remove internal employees
         self.data = self.data[self.data["Employment Status"] != "Employee"]
+        print(f"Automatically removed internal Starkey employees")
+        print(f"Remaining candidates: {self.data.shape[0]}\n")
+
+        # Remove inactive records
         self.data = self.data[self.data["Status"] == "Active"]
-        self.data = self.data[self.data["Good Candidate"].isin(["-", "Excellent", "Good", "Fair"])]
-        print("Removed junk")
+        print(f"Automatically removed inactive participants")
+        print(f"Remaining candidates: {self.data.shape[0]}\n")
+
+        # Remove poor candidates
+        self.data = self.data[self.data["Good Candidate"].isin(["-", 
+            "Excellent", "Good", "Fair"])]
+        print(f"Automatically removed poor candidates")
         print(f"Remaining candidates: {self.data.shape[0]}\n")
 
 
+    def write(self):
+        """ Save database to .csv"""
+        # Generate date stamp
+        now = datetime.now()
+        date_stamp = now.strftime("%Y_%b_%d_%H%M")
+        
+        # Create save file name
+        filename = 'filtered_db_' + str(date_stamp)
+
+        # Query user for save path
+        try:
+            save_path = filedialog.asksaveasfile(
+                initialfile= filename,
+                defaultextension='.csv').name
+        except AttributeError:
+            # Do nothing if cancelled
+            return
+
+        # Do nothing if cancelled
+        if not save_path:
+            return
+
+        # Write data to .csv file if a valid save path is given
+        self.data.to_csv(save_path, mode='w', index=False)
+        print("Database successfully written to file!")
+
+
+    #######################
+    # Filtering Functions #
+    #######################
     def filter(self, colname, operator, value):
         # Remove rows containing "-" (i.e., no data)
         #self.data = self.data[self.data[colname] != "-"]
@@ -127,9 +187,9 @@ class SubDB:
             self.data[colname] = self.data[colname].astype("float")
 
         # Perform filtering
-        if operator == "==":
+        if operator == "equals":
             self.data = self.data[self.data[colname] == value]
-        if operator == "!=":
+        if operator == "does not equal":
             self.data = self.data[self.data[colname] != value]
         if operator == ">":
             self.data = self.data[self.data[colname] > value]
@@ -179,7 +239,8 @@ class SubDB:
                 colname = side + " " + str(freq)
                 #ac.append(self.data[self.data['Subject Id'] == sub_id][colname].astype(int))
                 try:
-                    ac[side + ' ' + str(freq)] = int(self.data[self.data['Subject Id'] == sub_id][colname].values[0])
+                    ac[side + ' ' + str(freq)] = int(
+                        self.data[self.data['Subject Id'] == sub_id][colname].values[0])
                 except:
                     ac[side + ' ' + str(freq)] = None
 
@@ -191,7 +252,8 @@ class SubDB:
             for freq in freqs:
                 colname = side + " " + str(freq)
                 try:
-                    bc[side + ' ' + str(freq)] = int(self.data[self.data['Subject Id'] == sub_id][colname].values[0])
+                    bc[side + ' ' + str(freq)] = int(
+                        self.data[self.data['Subject Id'] == sub_id][colname].values[0])
                 except:
                     bc[side + ' ' + str(freq)] = None
 
@@ -263,14 +325,16 @@ class SubDB:
         ax.set_ylabel("Hearing Threshold (dB HL)")
         ax.semilogx()
         ax.set_xlim((200,9500))
-        ax.set_xticks(ticks=[250,500,1000,2000,4000,8000], labels=['250','500','1000','2000','4000','8000'])
+        ax.set_xticks(ticks=[250,500,1000,2000,4000,8000], labels=[
+            '250','500','1000','2000','4000','8000'])
         ax.set_xlabel("Frequency (Hz)")
         ax.axhline(y=25, color="black", linestyle='--', linewidth=1)
         ax.grid()
         ax.set_title(f"Audiogram for Participant {sub_id}")
 
         # Plot color regions
-        audio_colors = ["gray", "green", "gold", "orange", "mediumpurple", "lightsalmon"]
+        audio_colors = ["gray", "green", "gold", "orange", "mediumpurple", 
+            "lightsalmon"]
         alpha_val = 0.25
         degree_dict={
             'normal': (-10, 25),
@@ -281,23 +345,24 @@ class SubDB:
             'profound': (90, 120)
         }
         for idx, key in enumerate(degree_dict):
-            coords = [[0,degree_dict[key][0]], [9500,degree_dict[key][0]], [9500,degree_dict[key][1]], [0,degree_dict[key][1]]]
-            coords.append(coords[0]) # repeat the first point to create a 'closed loop'
-            xs, ys = zip(*coords) # create lists of x and y values
-            ax.fill(xs,ys, edgecolor='none', facecolor=audio_colors[idx], alpha=alpha_val)
+            coords = [
+                [0,degree_dict[key][0]], 
+                [9500,degree_dict[key][0]], 
+                [9500,degree_dict[key][1]], 
+                [0,degree_dict[key][1]]
+            ]
+            # Repeat the first point to create a 'closed loop'
+            coords.append(coords[0])
+            # Create lists of x and y values 
+            xs, ys = zip(*coords) 
+            # Fill polygon
+            ax.fill(xs,ys, edgecolor='none', 
+                facecolor=audio_colors[idx], alpha=alpha_val)
 
 
-    # def show_all_audios(self):
-    #     """ Show all audiograms for participants 
-    #         in database
-    #     """
-    #     # Get remaining subject ids
-    #     subs = self.data["Subject Id"]
-    #     # Plot each audio in succession
-    #     for sub in subs:
-    #         self.audio_ac(sub)
-
-
+    ###############################
+    # Acoustic Coupling Functions #
+    ###############################
     def coupling(self, sub_id):
         """ Return ProFit recommended coupling and vent size"""
 
@@ -336,12 +401,9 @@ class SubDB:
                 matrix = 'UP'
                 #reciever = 'custom cased'
 
-
-            print(matrix)
-            print(matrix in ['S', 'M', 'P'])
-            print(ac.items())
-
-
+            #print(matrix)
+            #print(matrix in ['S', 'M', 'P'])
+            #print(ac.items())
 
             # RIC acoustic coupling logic
             # This is partly based on the matrix recommendation from above
@@ -378,7 +440,6 @@ class SubDB:
 
             except TypeError:
                 coupling[side[:-3]] = '-'
-
 
 
             # RIC (and custom) vent size

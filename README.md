@@ -3,8 +3,8 @@
 Graphical user interface (GUI) for filtering and browsing subjects from the CAR database.
 
 - Written by: **Travis M. Moore**
-- Latest version: **Version 1.0.0**
-- Last edited: **November 11, 2022**
+- Latest version: **Version 0.0.2**
+- Last edited: **November 30, 2022**
 <br>
 <br>
 
@@ -99,6 +99,20 @@ The Subject Browser allows you to export a list of your custom filters in .csv f
 
 ## Resetting the Filters
 To clear all filter values, navigate to **Tools>Reset Filters**.  
+<br>
+<br>
+
+---
+
+## Recompiling from Source
+Additional data:
+
+- Add README folder
+- Add sample_data.csv file
+
+```
+pyinstaller --noconfirm --onefile --windowed --add-data "C:/Users/MooTra/Code/Python/recruiting/assets/README;README/" --add-data "C:/Users/MooTra/Code/Python/recruiting/assets/sample_data.csv;."  "C:/Users/MooTra/Code/Python/recruiting/controller.py"
+```
 <br>
 <br>
 

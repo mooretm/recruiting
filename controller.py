@@ -5,7 +5,7 @@
 
     Written by: Travis M. Moore
     Created: Jul 26, 2022
-    Last edited: Nov 11, 2022
+    Last edited: Nov 30, 2022
 """
 
 ###########
@@ -66,8 +66,9 @@ class App(tk.Tk):
         ######################################
         # Main window setup
         self.title('Subject Browser')
-        self.resizable(1,1)
+        self.resizable(0,1)
         self.columnconfigure(index=0, weight=1)
+        self.rowconfigure(index=0, weight=1)
 
         # Create filter settings dict
         self.filter_dict = {}
@@ -105,6 +106,7 @@ class App(tk.Tk):
         self.frm_browse = ttk.Frame(self.notebook)
         self.frm_filter.grid(row=0, column=0, ipadx=10, ipady=10, sticky='ew')
         self.frm_filter.columnconfigure(index=0, weight=1)
+        self.frm_filter.rowconfigure(index=0, weight=1)
         self.frm_browse.grid(row=0, column=0, ipadx=10, ipady=10)
         self.frm_browse.columnconfigure(index=0, weight=1)
 
@@ -308,7 +310,7 @@ class App(tk.Tk):
         """ Create filter view to load into notebook 'Filter' tab
         """
         self.filter_frame = fv.FilterFrame(self.frm_filter, db, filter_dict)
-        self.filter_frame.grid(row=0, column=0, sticky='ew')
+        self.filter_frame.grid(row=0, column=0, sticky='new')
 
 
     def _on_filter(self):
@@ -355,7 +357,7 @@ class App(tk.Tk):
                     "not currently fully supported. It is likely that " + 
                     "the data type of some columns has been changed. Your " +
                     "request cannot be processed.")
-            return
+            #return
 
         # Update tree widget after filtering
         self.sub_tree._load_tree()

@@ -60,10 +60,10 @@ class BrowseFrame(ttk.Frame):
         lfrm_data.grid(row=0, column=0, columnspan=2, sticky='nsew', **options)
         # Age
         ttk.Label(lfrm_data, text="Age:").grid(row=0, column=0, sticky='e')
-        ttk.Label(lfrm_data, textvariable=self._vars['age'], width=60).grid(row=0, column=1, sticky='w', **data_options)
+        ttk.Label(lfrm_data, textvariable=self._vars['age']).grid(row=0, column=1, sticky='w', **data_options)
         # Miles away
-        ttk.Label(lfrm_data, text="Miles Away:").grid(row=1, column=0, sticky='e')
-        ttk.Label(lfrm_data, textvariable=self._vars['miles_away']).grid(row=1, column=1, sticky='w', **data_options)
+        #ttk.Label(lfrm_data, text="Miles Away:").grid(row=1, column=0, sticky='e')
+        #ttk.Label(lfrm_data, textvariable=self._vars['miles_away']).grid(row=1, column=1, sticky='w', **data_options)
         # Smartphone
         ttk.Label(lfrm_data, text="Smartphone:").grid(row=2, column=0, sticky='e')
         ttk.Label(lfrm_data, textvariable=self._vars['smartphone_type']).grid(row=2, column=1, sticky='w', **data_options)
@@ -137,5 +137,6 @@ class BrowseFrame(ttk.Frame):
         figure = Figure(figsize=(5, 4), dpi=100)
         figure_canvas = FigureCanvasTkAgg(figure, self)
         ax1 = figure.add_subplot()
-        figure_canvas.get_tk_widget().grid(row=10, column=0, columnspan=2, pady=10, padx=10)
+        figure_canvas.get_tk_widget().grid(row=10, column=0, columnspan=2, 
+            pady=10, padx=10, sticky='w')
         return ax1

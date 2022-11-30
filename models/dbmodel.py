@@ -17,7 +17,15 @@ from tkinter import filedialog
 # Import data science packages
 import numpy as np
 import pandas as pd
+
+
+
 import matplotlib.pyplot as plt
+
+import matplotlib
+matplotlib.use('TkAgg')
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
 # Import system packages
 from datetime import datetime
@@ -49,7 +57,7 @@ class SubDB:
 
         # Convert age back to string after importing 
         # a previously-exported database .csv file
-        self.data['Age'] = self.data['Age'].astype("str")
+        self.data['Age'] = self.data['Age'].astype('str')
 
         # Convert all values back to strings
         #self.data = self.data.astype(str)
@@ -181,10 +189,10 @@ class SubDB:
         # Remove rows containing "-" (i.e., no data)
         #self.data = self.data[self.data[colname] != "-"]
         # Check data type of value
-        if isinstance(value, int):
-            self.data[colname] = self.data[colname].astype("int")
-        elif isinstance(value, float):
-            self.data[colname] = self.data[colname].astype("float")
+        #if isinstance(value, int):
+        #    self.data[colname] = self.data[colname].astype("int")
+        #elif isinstance(value, float):
+        #    self.data[colname] = self.data[colname].astype("float")
 
         # Perform filtering
         # NOTE: Add OR condition to include '-' values for every operator!

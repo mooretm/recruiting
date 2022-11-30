@@ -4,3 +4,7 @@ __init__.py
 etc/
 junk/
 output/
+build/
+*.spec
+dist/
+*.docx

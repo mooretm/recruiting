@@ -54,12 +54,22 @@ class FilterFrame(ttk.Frame):
 
         # Create frames
         frm_filter = ttk.Frame(self)
-        frm_filter.grid(row=0, column=0, sticky='ew')
+        frm_filter.grid(row=0, column=0, sticky='nsew')
         # Set columns to expand
         frm_filter.columnconfigure(index=1, weight=1)
         frm_filter.columnconfigure(index=2, weight=1)
         frm_filter.columnconfigure(index=3, weight=1)
+        # Set rows to expand
+        #rows = range(0,30)
+        #for row in rows:
+        #    frm_filter.rowconfigure(index=row, weight=1)
 
+        frm_output = ttk.Frame(self)
+        frm_output.grid(row=21, column=0, **options, 
+            sticky='nsew')
+        #for ii in range(1,4):
+        #    frm_output.columnconfigure(index=ii, weight=1)
+        frm_output.columnconfigure(index=1, weight=1)
 
         ############
         # Controls #
@@ -67,23 +77,26 @@ class FilterFrame(ttk.Frame):
         label_text = ['Attribute', 'Operator', 'Value']
         for idx, label in enumerate(label_text, start=1):
             ttk.Label(frm_filter, text=label).grid(
-                row=5, column=idx, pady=10)
+                row=5, column=idx, pady=10, sticky='n')
 
         # Filter button
         ttk.Button(frm_filter, text="Filter Records", 
             command=self._do_filter).grid(row=20, column=2, sticky='ew')
 
         # Text widget for displaying filtering results
-        self.txt_output = tk.Text(frm_filter, height=20, width=50)
-        self.txt_output.grid(row=21, column=1, columnspan=4, **options,
-            sticky='nsew')
+        #self.txt_output = tk.Text(frm_filter, height=10)
+        #self.txt_output.grid(row=21, column=1, columnspan=4, **options,
+        #    sticky='nsew')
+        self.txt_output = tk.Text(frm_output, height=10)
+        self.txt_output.grid(row=1, column=1, sticky='nsew')
 
-        # # Scrollbar for text widget
-        # scroll = ttk.Scrollbar(frm_filter, orient='vertical', 
-        #     command=self.txt_output.yview)
-        # scroll.grid(row=21, column=4, sticky='ns')
 
-        # self.txt_output['yscrollcommand'] = scroll.set
+        # Scrollbar for text widget
+        scroll = ttk.Scrollbar(frm_output, orient='vertical', 
+            command=self.txt_output.yview)
+        scroll.grid(row=1, column=2, sticky='ns')
+
+        self.txt_output['yscrollcommand'] = scroll.set
 
 
         ###############################
@@ -113,7 +126,7 @@ class FilterFrame(ttk.Frame):
                 textvariable=self.attrib_vars[ii], takefocus=0)
             # Show combobox
             cb_attrib.grid(row=6+ii, column=1, pady=(0,10), padx=10,
-                sticky='ew')
+                sticky='nwew')
             # Populate combobox
             cb_attrib['values'] = self.attributes
             # Append combobox to list
@@ -128,7 +141,7 @@ class FilterFrame(ttk.Frame):
             cb_op = ttk.Combobox(frm_filter, 
                 textvariable=self.op_vars[ii], takefocus=0)
             # Show combobox
-            cb_op.grid(row=6+ii, column=2, pady=(0,10), sticky='ew')
+            cb_op.grid(row=6+ii, column=2, pady=(0,10), sticky='nsew')
             # Populate combobox
             cb_op['values'] = self.operators
             # Append combobox to list
@@ -145,7 +158,7 @@ class FilterFrame(ttk.Frame):
                 postcommand=self.get_values, takefocus=0)
             # Show combobox
             cb_value.grid(row=6+ii, column=3, pady=(0,10), padx=10,
-                sticky='ew')
+                sticky='nsew')
             # Append combobox to list
             self.value_cbs.append(cb_value)
 
@@ -213,6 +226,21 @@ class FilterFrame(ttk.Frame):
                     value = self.value_vars[ii].get().split()
                 else:
                     value = self.value_vars[ii].get()
+
+
+                ###############################
+                # Patch for Subject Id #
+                ###############################
+                if self.attrib_vars[ii].get() == 'Subject Id':
+                    if isinstance(value, str):
+                        value = int(value)
+                    elif isinstance(value, list):
+                        value = [int(x) for x in value]
+                ###################################
+                # End Patch for Subject Id #
+                ###################################
+
+
                 # If all values are present in a given row, append to list
                 all_data.append((
                     self.attrib_vars[ii].get(), 

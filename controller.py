@@ -5,7 +5,7 @@
 
     Written by: Travis M. Moore
     Created: Jul 26, 2022
-    Last edited: Nov 30, 2022
+    Last edited: Dec 08, 2022
 """
 
 ###########
@@ -192,13 +192,24 @@ class App(tk.Tk):
         """
         # Query user for database .csv file
         filename = filedialog.askopenfilename()
+
         # Do nothing if cancelled
         if not filename:
             return
+
         # If a valid filename is found, load it
         self.db.load_db(filename)
-        # Remove junk records
-        self._initial_scrub()
+
+        if self.filter_frame.scrub_var.get() == 1:
+            # Remove junk records
+            self._initial_scrub()
+        else:
+            # Clear any previous output from textbox
+            self.filter_frame.txt_output.delete('1.0', tk.END)
+            # Show total record count
+            self.filter_frame.txt_output.insert(tk.END,
+                f"Candidates before filtering: {str(self.db.data.shape[0])}\n\n")
+
         # Reload the treeview with imported database
         self.sub_tree._load_tree()
 
@@ -230,8 +241,7 @@ class App(tk.Tk):
         """
         # Get updated filter values dict
         self.filter_dict = self.filtermodel.import_filter_dict()
-        # Update filterview comboboxes
-        self.filter_frame._load_filters(self.filter_dict)
+        self._filter(self.filter_dict)
 
 
     def _export_filter_list(self):
@@ -304,7 +314,7 @@ class App(tk.Tk):
 
 
     ##########################
-    # Filter Frame Functions #
+    # Filter View Functions #
     ##########################
     def create_filter_frame(self, db, filter_dict):
         """ Create filter view to load into notebook 'Filter' tab
@@ -332,6 +342,14 @@ class App(tk.Tk):
                 message="No filters have been set!")
             return
 
+        # For DEBUG:
+        # print(filter_val_dict)
+        # keys = filter_val_dict.keys()
+        # for key in keys:
+        #     print(type(filter_val_dict[key][2]))
+        # print("Column data type for miles from starkey")
+        # print(self.db.data.dtypes['Miles From Starkey'])
+
         # Clear any previous output from textbox
         self.filter_frame.txt_output.delete('1.0', tk.END)
 
@@ -350,14 +368,14 @@ class App(tk.Tk):
                     f"Filtering by: {filter_val_dict[val][0]} " +
                     f"{filter_val_dict[val][1]} {filter_val_dict[val][2]}...\n" +
                     f"Remaining Candidates: {str(self.db.data.shape[0])}\n\n")
-        except TypeError:
+        except TypeError as e:
+            print(e)
             messagebox.showerror(title="Filtering Error",
                 message="Cannot compare different data types!",
-                detail="Filtering a previously-exported database file is " +
-                    "not currently fully supported. It is likely that " + 
-                    "the data type of some columns has been changed. Your " +
-                    "request cannot be processed.")
-            #return
+                detail="The search term data type does not match the " +
+                    "database data type. This can happen when importing " +
+                    "a filtered database, or faulty filtering code. " +
+                    "Aborting.")
 
         # Update tree widget after filtering
         self.sub_tree._load_tree()

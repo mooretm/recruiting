@@ -61,6 +61,7 @@ class SubDB:
 
         # Convert all values back to strings
         #self.data = self.data.astype(str)
+        # Pretty sure everything is loaded in as an object data type?
 
         # Provide feedback
         print("Loaded database records")

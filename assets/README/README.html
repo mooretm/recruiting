@@ -2,8 +2,8 @@
 <p>Graphical user interface (GUI) for filtering and browsing subjects from the CAR database.</p>
 <ul>
 <li>Written by: <strong>Travis M. Moore</strong></li>
-<li>Latest version: <strong>Version 0.0.2</strong></li>
-<li>Last edited: <strong>November 30, 2022</strong>
+<li>Latest version: <strong>Version 0.0.3</strong></li>
+<li>Last edited: <strong>December 08, 2022</strong>
 <br>
 <br></li>
 </ul>
@@ -72,7 +72,19 @@
 </ul>
 <hr />
 <h2>Importing Database Files</h2>
-<p>The Subject Browser can import full downloads from the CAR database, as well as filtered database files exported from the Subject Browser.
+<p>The Subject Browser can import full downloads from the CAR database, as well as filtered database files exported from the Subject Browser.</p>
+<h3>Full Database Imports</h3>
+<p>When importing the full database, you have the option to perform some default filtering to remove:</p>
+<ul>
+<li>Inactive participants</li>
+<li>Participants rated as "poor"</li>
+<li>Starkey employees</li>
+<li>Participants outside the 60-mile round-trip maximum distance from the Eden Prairie campus</li>
+</ul>
+<p>These filters are automatically applied if the "Initial Scrub" checkbox in the "Options" group (in the filter view) is selected. "Initial Scrub" is selected by default. To avoid these filters, deselect the checkbox before importing the full database. </p>
+<p><img src="filter_options.png" alt="Initial Scrub image" width="600"/></p>
+<h3>Filtered Database Imports</h3>
+<p>Filtered databases refer to databases previously exported from the Subject Browser, even if no filters were applied. Note that automatic filtering is not applied when importing filtered databases (i.e., previously exported databases).
 <br>
 <br></p>
 <hr />
@@ -82,7 +94,8 @@
 <br></p>
 <hr />
 <h2>Importing Filter Lists</h2>
-<p>The Subject Browser allows you to import a list of saved filter values to avoid entering filter values by hand. This is useful when using the same filter values across recruiting sessions. 
+<p>The Subject Browser allows you to import a list of saved filter values to avoid entering filter values by hand. This is useful when using the same filter values across several recruiting sessions. </p>
+<p>Note: Imported filters are not displayed in the filter dropdowns in the filter view. You can still track filtering progress in the text area at the bottom of the filter view, however. 
 <br>
 <br></p>
 <hr />
@@ -96,7 +109,7 @@
 <br>
 <br></p>
 <hr />
-<h2>Recompiling from Source</h2>
+<h2>Compiling from Source</h2>
 <p>Additional data:</p>
 <ul>
 <li>Add README folder</li>

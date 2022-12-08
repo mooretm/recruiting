@@ -2,6 +2,20 @@
 
 ---
 
+## v.0.0.3
+
+Date: Dec 08, 2022
+
+### Minor Features
+1. Added checkbox to allow user to decide whether the initial scrub occurs or not. 
+
+2. Modified import filter list to skip updating the filter dropdowns. This allows an unlimited number of imported filters to be run, rather than being limited to the 
+number of displayed dropdowns. Imported filters are now directly passed to the filter function. 
+<br>
+<br>
+
+---
+
 ## v.0.0.2
 
 Date: Nov 30, 2022
@@ -14,7 +28,10 @@ Date: Nov 30, 2022
 3. Shortened height of filterview output textbox to accommodate smaller laptop screens. 
 
 4. Added scrollbar widget to filterview output textbox. 
+<br>
+<br>
 
+---
 
 ## v0.0.1
 

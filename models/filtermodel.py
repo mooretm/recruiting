@@ -26,10 +26,6 @@ class FilterList:
         filter combobox values
     """
 
-    #def __init__(self):
-    #    pass
-
-
     def import_filter_dict(self):
         # Query user for filter .csv file
         filename = filedialog.askopenfilename()
@@ -45,8 +41,9 @@ class FilterList:
         for key in keys:
             # Check for lists
             if filter_df.loc[1,key] == 'contains':
-                filter_list = ast.literal_eval(filter_df.loc[2,key])
-                value = ' '.join(filter_list)
+                #filter_list = ast.literal_eval(filter_df.loc[2,key])
+                #value = ' '.join(filter_list)
+                value = ast.literal_eval(filter_df.loc[2,key])
             else:
                 value = filter_df.loc[2,key]
             # Assign values to dict
@@ -54,7 +51,34 @@ class FilterList:
                         filter_df.loc[1,key],
                         value
             )
+
         return filter_dict
+
+
+    # def import_filter_dict(self):
+    #     # Query user for filter .csv file
+    #     filename = filedialog.askopenfilename()
+    #     # Do nothing if cancelled
+    #     if not filename:
+    #         return
+    #     # If a valid filename is found, load it
+    #     filter_df = pd.read_csv(filename)
+
+    #     # Create filter dict
+    #     keys = list(filter_df.columns)
+    #     filter_dict = {}
+    #     for key in keys:
+    #         # Check for lists
+    #         if filter_df.loc[1,key] == 'contains':
+    #             value = ast.literal_eval(filter_df.loc[2,key])
+    #         else:
+    #             value = filter_df.loc[2,key]
+    #         # Assign remaining values to dict
+    #         filter_dict[key] = (filter_df.loc[0,key],
+    #                     filter_df.loc[1,key],
+    #                     value
+    #         )
+    #     return filter_dict
 
 
     def export_filters(self, filter_dict):

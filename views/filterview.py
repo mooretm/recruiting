@@ -71,9 +71,21 @@ class FilterFrame(ttk.Frame):
         #    frm_output.columnconfigure(index=ii, weight=1)
         frm_output.columnconfigure(index=1, weight=1)
 
+        frm_options = ttk.LabelFrame(frm_filter, text="Options")
+        frm_options.grid(row=2, column=1, padx=10, pady=(10,0),
+            sticky='nsew')
+        frm_options.columnconfigure(index=1, weight=1)
+
         ############
         # Controls #
         ############
+        # Initial scrub checkbutton
+        self.scrub_var = tk.IntVar(value=1)
+        chk_scrub = ttk.Checkbutton(frm_options, text="Initial Scrub", 
+            takefocus=0, variable=self.scrub_var).grid(
+                row=0, column=0, sticky='w', padx=5, pady=5)
+
+        # Filter box labels
         label_text = ['Attribute', 'Operator', 'Value']
         for idx, label in enumerate(label_text, start=1):
             ttk.Label(frm_filter, text=label).grid(
@@ -103,7 +115,7 @@ class FilterFrame(ttk.Frame):
         # Create Filtering Comboboxes #
         ###############################
         # Specify number of rows
-        num_fields = 10
+        num_fields = 6 #10
 
         # Attribute combobox
         self.attrib_vars = []
@@ -281,13 +293,23 @@ class FilterFrame(ttk.Frame):
 
 
     def _load_filters(self, filter_dict):
-        """ Populate comboboxes with values from provided dict
+        """ Populate comboboxes with values from provided dict.
+            
+            Retired function - no longer called. 
         """
         # Clear any textbox output
         self.txt_output.delete('1.0', tk.END)
 
         # Populate comboxes with new values
-        for ii in filter_dict:
-            self.attrib_cbs[int(ii)].set(filter_dict[ii][0])
-            self.op_cbs[int(ii)].set(filter_dict[ii][1])
-            self.value_cbs[int(ii)].set(filter_dict[ii][2])
+        try:
+            for ii in filter_dict:
+                self.attrib_cbs[int(ii)].set(filter_dict[ii][0])
+                self.op_cbs[int(ii)].set(filter_dict[ii][1])
+                self.value_cbs[int(ii)].set(filter_dict[ii][2])
+        except IndexError:
+            messagebox.showinfo(title="So Many Filters",
+                message="The number of imported filters exceeds the " +
+                    "number of filter dropdowns!",
+                detail="All filters will still be applied, but they " +
+                    "will not be displayed.")
+            raise IndexError

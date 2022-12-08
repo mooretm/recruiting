@@ -3,8 +3,8 @@
 Graphical user interface (GUI) for filtering and browsing subjects from the CAR database.
 
 - Written by: **Travis M. Moore**
-- Latest version: **Version 0.0.2**
-- Last edited: **November 30, 2022**
+- Latest version: **Version 0.0.3**
+- Last edited: **December 08, 2022**
 <br>
 <br>
 
@@ -71,6 +71,21 @@ Graphical user interface (GUI) for filtering and browsing subjects from the CAR 
 
 ## Importing Database Files
 The Subject Browser can import full downloads from the CAR database, as well as filtered database files exported from the Subject Browser.
+
+### Full Database Imports
+When importing the full database, you have the option to perform some default filtering to remove:
+
+- Inactive participants
+- Participants rated as "poor"
+- Starkey employees
+- Participants outside the 60-mile round-trip maximum distance from the Eden Prairie campus
+
+These filters are automatically applied if the "Initial Scrub" checkbox in the "Options" group (in the filter view) is selected. "Initial Scrub" is selected by default. To avoid these filters, deselect the checkbox before importing the full database. 
+
+<img src="filter_options.png" alt="Initial Scrub image" width="600"/>
+
+### Filtered Database Imports
+Filtered databases refer to databases previously exported from the Subject Browser, even if no filters were applied. Note that automatic filtering is not applied when importing filtered databases (i.e., previously exported databases).
 <br>
 <br>
 
@@ -84,7 +99,9 @@ The Subject Browser allows you to export filtered .csv database files for furthe
 ---
 
 ## Importing Filter Lists
-The Subject Browser allows you to import a list of saved filter values to avoid entering filter values by hand. This is useful when using the same filter values across recruiting sessions. 
+The Subject Browser allows you to import a list of saved filter values to avoid entering filter values by hand. This is useful when using the same filter values across several recruiting sessions. 
+
+Note: Imported filters are not displayed in the filter dropdowns in the filter view. You can still track filtering progress in the text area at the bottom of the filter view, however. 
 <br>
 <br>
 
@@ -104,7 +121,7 @@ To clear all filter values, navigate to **Tools>Reset Filters**.
 
 ---
 
-## Recompiling from Source
+## Compiling from Source
 Additional data:
 
 - Add README folder

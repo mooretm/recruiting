@@ -5,7 +5,7 @@
 
     Written by: Travis M. Moore
     Created: Jul 26, 2022
-    Last edited: Dec 08, 2022
+    Last edited: Feb 14, 2023
 """
 
 ###########
@@ -432,11 +432,13 @@ class App(tk.Tk):
             self._vars['r_receiver'] = self.db.data[self.db.data['Subject Id'] == record]['Right Ric Cable Size'].values[0]
             self._vars['l_receiver'] = self.db.data[self.db.data['Subject Id'] == record]['Left Ric Cable Size'].values[0]
             try:
-                coupling, vent_size = self.db.coupling(record)
+                matrix, coupling, vent_size = self.db.coupling(record)
                 self._vars['r_rec_coupling'] = coupling['Right']
                 self._vars['l_rec_coupling'] = coupling['Left']
                 self._vars['r_rec_vent'] = vent_size['Right']
                 self._vars['l_rec_vent'] = vent_size['Left']
+                self._vars['l_matrix'] = matrix['Left']
+                self._vars['r_matrix'] = matrix['Right']
             except TypeError:
                 messagebox.showerror(title="Error!",
                     message="An error occurred calculating the coupling type!",

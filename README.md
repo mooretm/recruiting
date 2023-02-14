@@ -3,8 +3,8 @@
 Graphical user interface (GUI) for filtering and browsing subjects from the CAR database.
 
 - Written by: **Travis M. Moore**
-- Latest version: **Version 0.0.3**
-- Last edited: **December 08, 2022**
+- Latest version: **Version 0.0.4**
+- Last edited: **February 14, 2023**
 <br>
 <br>
 

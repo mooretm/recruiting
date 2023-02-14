@@ -2,6 +2,17 @@
 
 ---
 
+## v.0.0.4
+
+Date: Feb 14, 2023
+
+### Minor Features
+1. Added label displaying the Pro Fit suggested matrix/power for each receiver
+<br>
+<br>
+
+---
+
 ## v.0.0.3
 
 Date: Dec 08, 2022

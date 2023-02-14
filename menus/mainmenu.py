@@ -88,9 +88,9 @@ class MainMenu(tk.Menu):
         about_message = 'Subject Browser'
         about_detail = (
             'Written by: Travis M. Moore\n'
-            'Version 0.0.3\n'
+            'Version 0.0.4\n'
             'Created: Jul 26, 2022\n'
-            'Last Edited: Dec 08, 2022'
+            'Last Edited: Feb 14, 2023'
         )
         messagebox.showinfo(
             title='About',

@@ -4,8 +4,6 @@
     from the online subject database. 
 
     Author: Travis M. Moore
-    Created: 1 Aug, 2022
-    Last Edited: Nov 09, 2022
  """
 
 ###########
@@ -383,6 +381,7 @@ class SubDB:
         sides = ['RightAC ', 'LeftAC ']
         coupling = {}
         vent_size = {}
+        matrix = {}
 
         for side in sides:
             # RIC matrix selection logic
@@ -394,26 +393,22 @@ class SubDB:
                     recommendation_threshold = ac[side + '500'] + 10
             except TypeError:
                 raise TypeError
-                #print("Cannot determine recommendation threshold!")
-                #return
 
             # Step 2: choose matrix based on recommendation threshold
             if recommendation_threshold <= 65:
-                matrix = 'M'
+                power = 'M'
                 #receiver = 'stock'
             elif (recommendation_threshold <= 75) and (recommendation_threshold > 65):
-                matrix = 'P'
+                power = 'P'
                 #receiver = 'stock'
             elif (recommendation_threshold <= 80) and (recommendation_threshold > 75):
-                matrix = 'P'
+                power = 'P'
                 #receiver = 'custom cased'
             elif recommendation_threshold > 80:
-                matrix = 'UP'
+                power = 'UP'
                 #reciever = 'custom cased'
 
-            #print(matrix)
-            #print(matrix in ['S', 'M', 'P'])
-            #print(ac.items())
+            matrix[side[:-3]] = power
 
             # RIC acoustic coupling logic
             # This is partly based on the matrix recommendation from above
@@ -421,14 +416,14 @@ class SubDB:
                 # Open dome
                 if (ac[side + '250'] and ac[side + '500'] < 30) \
                     and (ac[side + '1000'] <= 60) \
-                    and (matrix in ['S', 'M', 'P']):
+                    and (matrix[side[:-3]] in ['S', 'M', 'P']):
                         coupling[side[:-3]] = 'Open Dome'
 
                 # Occluded dome
                 elif (ac[side + '250'] or ac[side + '500'] > 30) \
                     and (ac[side + '250'] and ac[side + '500'] <= 50) \
                     and (ac[side + '1000'] <= 60) \
-                    and (matrix in ['S', 'M', 'P']):
+                    and (matrix[side[:-3]] in ['S', 'M', 'P']):
                         coupling[side[:-3]] = 'Occluded Dome'
 
                 # Earmolds
@@ -467,7 +462,7 @@ class SubDB:
             else:
                 vent_size[side[:-3]] = 'NA'
 
-        return coupling, vent_size
+        return matrix, coupling, vent_size
 
 
 class DataModel:
@@ -489,4 +484,6 @@ class DataModel:
         'l_rec_coupling': {'req': True, 'type': FT.string},
         'r_rec_vent': {'req': True, 'type': FT.string},
         'l_rec_vent': {'req': True, 'type': FT.string},
+        'r_matrix': {'req': True, 'type': FT.string},
+        'l_matrix': {'req': True, 'type': FT.string}
     }
